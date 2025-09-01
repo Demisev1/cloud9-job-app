@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Application</title>
+  <meta name="description" content="Apply for a position at Cloud 9 Vapes or The Hemp and Kratom Depot">
+  <style>
+    :root {
+      --brand:#2c2c54;
+      --text:#111827;
+      --muted:#6b7280;
+      --bg:#f8f6f9;
+      --card:#ffffff;
+      --border:#e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); margin:0; }
+    header { background:var(--card); padding:20px; text-align:center; border-bottom:2px solid #ddd; }
+    .logo { display:flex; align-items:center; justify-content:center; margin:0 auto; width:260px; height:64px; background:var(--brand); color:#fff; border-radius:10px; font-weight:700; letter-spacing:.4px; }
+    h1 { margin:10px 0 0; font-size:24px; color:var(--brand); }
+    form { max-width:960px; margin:28px auto; background:var(--card); padding:22px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    fieldset { border:1px solid var(--border); border-radius:10px; padding:16px; margin:18px 0; }
+    legend { font-weight:700; color:var(--brand); padding:0 6px; }
+    label { display:block; margin:8px 0 4px; }
+    input[type=text], input[type=email], input[type=tel], input[type=date], textarea, select {
+      width:100%; padding:10px; border:1px solid #cfd4dc; border-radius:8px; margin-top:4px; background:#fff;
+    }
+    textarea { resize:vertical; }
+    .radio-group label { display:flex; align-items:center; gap:8px; margin:4px 0; }
+    .location-list label { display:block; margin:6px 0; }
+    .hint { color:var(--muted); font-size:13px; }
+    .req { color:#c81e1e; }
+    .row-cols { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    button { background:var(--brand); color:#fff; border:none; padding:12px 18px; border-radius:10px; cursor:pointer; font-weight:600; }
+    button:hover { filter:brightness(.95); }
+    .status { margin-top:10px; color:var(--brand); }
+    .error { color:#b91c1c; }
+    .sr-only { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+  </style>
+
+  <!-- EmailJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // EmailJS keys (yours)
+    const EMAILJS_PUBLIC_KEY = "kf8Acdv6yrSNa_AaH";
+    const EMAILJS_SERVICE_ID = "service_2fr4mdc";
+    const EMAILJS_TEMPLATE_ID = "template_a4e1928";
+
+    // Company -> Locations map
+    const COMPANY_LOCATIONS = {
+      "Cloud 9 Vapes": [
+        "2315 Hillcrest Rd - Mobile, AL 36695 Open 24/7",
+        "3913 Airport Blvd - Mobile, AL 36608",
+        "7885 Moffett Rd - Semmes, AL 36575",
+        "27080 Hwy 98 - Daphne, AL 36526 Open 24/7",
+        "3586 Sangani Blvd - D'Iberville, MS 39540 24/7",
+        "29 Shell St - Saraland, AL 36571 Soon To Be 24/7",
+        "4439 Rangeline Rd - Tillman’s Corner"
+      ],
+      "The Hemp and Kratom Depot": [
+        "3506 Main St, Moss Point, MS 39563"
+      ]
+    };
+
+    function yyyymmdd(d) {
+      const dt = new Date(d);
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth()+1).padStart(2,'0');
+      const day = String(dt.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function renderLocations(company) {
+      const container = document.getElementById('locationsContainer');
+      const list = COMPANY_LOCATIONS[company] || [];
+      // Clear existing
+      container.innerHTML = "";
+      if (!company) {
+        container.innerHTML = '<p class="hint">Select a company to choose a location.</p>';
+        return;
+      }
+      if (list.length === 0) {
+        container.innerHTML = '<p class="hint">No locations available.</p>';
+        return;
+      }
+      // Build checkboxes
+      const frag = document.createDocumentFragment();
+      list.forEach((addr, idx) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'locations';
+        input.value = addr;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(' ' + addr));
+        frag.appendChild(label);
+      });
+      container.appendChild(frag);
+      const hint = document.createElement('div');
+      hint.className = "hint";
+      hint.textContent = "Pick at least one.";
+      container.appendChild(hint);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+      // Age gate: birthdate max = today - 21 years
+      const dob = document.getElementById('birthdate');
+      if (dob) {
+        const t = new Date();
+        const max = new Date(t.getFullYear() - 21, t.getMonth(), t.getDate());
+        dob.setAttribute('max', yyyymmdd(max));
+      }
+
+      // Render initial (no company selected)
+      renderLocations("");
+
+      // On company change, re-render locations and clear any previous selection
+      document.getElementById('company').addEventListener('change', (e) => {
+        renderLocations(e.target.value);
+      });
+
+      // Honeypot
+      const hp = document.getElementById('hp');
+      if (hp) hp.value = '';
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <div class="logo">Cloud 9 Vapes</div>
+    <h1>Job Application</h1>
+  </header>
+
+  <form id="applicationForm" autocomplete="on" novalidate>
+    <!-- Honeypot -->
+    <label class="sr-only" for="hp">Do not fill this field</label>
+    <input id="hp" name="hp" type="text" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <!-- Company & Locations -->
+    <fieldset>
+      <legend>Company & Location</legend>
+
+      <div class="row-cols">
+        <div>
+          <label for="company">Company <span class="req">*</span></label>
+          <select id="company" name="company" required>
+            <option value="">-- Select Company --</option>
+            <option value="Cloud 9 Vapes">Cloud 9 Vapes</option>
+            <option value="The Hemp and Kratom Depot">The Hemp and Kratom Depot</option>
+          </select>
+        </div>
+        <div>
+          <label for="start_date">Earliest Start Date <span class="req">*</span></label>
+          <input type="date" id="start_date" name="start_date" required>
+        </div>
+      </div>
+
+      <div class="location-list" id="locationsContainer" style="margin-top:8px;">
+        <!-- dynamically rendered checkboxes go here -->
+      </div>
+    </fieldset>
+
+    <!-- Personal Info -->
+    <fieldset>
+      <legend>Personal Information</legend>
+      <div class="row-cols">
+        <div>
+          <label for="first_name">First Name <span class="req">*</span></label>
+          <input type="text" id="first_name" name="first_name" required>
+        </div>
+        <div>
+          <label for="last_name">Last Name <span class="req">*</span></label>
+          <input type="text" id="last_name" name="last_name" required>
+        </div>
+        <div>
+          <label for="email">Email <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+          <label for="phone">Phone <span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" required>
+        </div>
+        <div>
+          <label for="birthdate">Birthdate (must be 21+) <span class="req">*</span></label>
+          <input type="date" id="birthdate" name="birthdate" required>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Position -->
+    <fieldset>
+      <legend>Position</legend>
+      <label for="position">Position Applying For <span class="req">*</span></label>
+      <input type="text" id="position" name="position" required>
+
+      <div class="radio-group" style="margin-top:8px;">
+        <p><b>Which best describes the position you are looking for?</b> <span class="req">*</span></p>
+        <label><input type="radio" name="position_type" value="Full time" required> Full time</label>
+        <label><input type="radio" name="position_type" value="Part time"> Part time</label>
+        <label><input type="radio" name="position_type" value="Over Nights"> Over Nights</label>
+        <label><input type="radio" name="position_type" value="Any available position"> Any available position</label>
+      </div>
+    </fieldset>
+
+    <!-- Availability -->
+    <fieldset>
+      <legend>Availability & Scheduling <span class="req">*</span></legend>
+      <p class="hint">
+        Cloud 9 Vapes is open 7 days a week, and the Hillcrest, Daphne and D'Iberville locations remain open overnight.
+        Are there any days or shifts you cannot work or would be unwilling to work? If so, please elaborate.
+      </p>
+      <textarea id="availability_limits" name="availability_limits" rows="4" required placeholder="e.g., Can't work Tuesdays after 6pm; no overnights"></textarea>
+    </fieldset>
+
+    <!-- About You -->
+    <fieldset>
+      <legend>About You <span class="req">*</span></legend>
+      <div class="radio-group">
+        <label><input type="radio" name="use_profile" value="I currently vape" required> I currently vape</label>
+        <label><input type="radio" name="use_profile" value="I currently smoke"> I currently smoke</label>
+        <label><input type="radio" name="use_profile" value="I am a dual user (vape and smoke)"> I am a dual user (vape and smoke)</label>
+        <label><input type="radio" name="use_profile" value="I used vaping to quit smoking and no longer vape"> I used vaping to quit smoking and no longer vape</label>
+        <label><input type="radio" name="use_profile" value="I do not currently vape or smoke"> I do not currently vape or smoke</label>
+      </div>
+    </fieldset>
+
+    <!-- Skills -->
+    <fieldset>
+      <legend>Knowledge & Skills <span class="req">*</span></legend>
+      <p class="hint">Although not required, knowledge of products and skills such as working with rebuildables are advantageous.
+      Describe any relevant knowledge or skills. If none, simply write “None”.</p>
+      <textarea id="skills_knowledge" name="skills_knowledge" rows="4" required placeholder="e.g., coil building, Ohm's law basics, disposables troubleshooting, POS experience"></textarea>
+    </fieldset>
+
+    <!-- Experience -->
+    <fieldset>
+      <legend>Prior Vape Industry Experience</legend>
+      <p class="hint">Do you have any prior experience working in the vape industry? If so, for how long, and where?</p>
+      <textarea id="vape_experience" name="vape_experience" rows="4" placeholder="e.g., 1 year at XYZ Vape — sales & inventory"></textarea>
+    </fieldset>
+
+    <!-- Extras -->
+    <fieldset>
+      <legend>Extra</legend>
+      <label for="why_here">Why do you want to work here?</label>
+      <textarea id="why_here" name="why_here" rows="3"></textarea>
+
+      <label for="referred_by">Were you referred by someone?</label>
+      <input type="text" id="referred_by" name="referred_by" placeholder="Employee name, friend, or N/A">
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">Submit Application</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </form>
+
+  <script>
+    function getCheckedLocations() {
+      return Array.from(document.querySelectorAll('#locationsContainer input[name="locations"]:checked'))
+        .map(el => el.value)
+        .join(', ');
+    }
+    function getRadioValue(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '';
+    }
+    function calcAgeYears(isoDate) {
+      const d = new Date(isoDate);
+      if (isNaN(d)) return 0;
+      const today = new Date();
+      let age = today.getFullYear() - d.getFullYear();
+      const m = today.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+      return age;
+    }
+
+    const form = document.getElementById('applicationForm');
+    const statusEl = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Honeypot
+      if (document.getElementById('hp').value) {
+        statusEl.textContent = "Submission blocked.";
+        return;
+      }
+
+      const company = document.getElementById('company').value;
+      if (!company) { statusEl.textContent = "Please select a company."; statusEl.classList.add('error'); return; }
+
+      // Required: at least one location
+      const locationsJoined = getCheckedLocations();
+      if (!locationsJoined) { statusEl.textContent = "Please choose at least one location."; statusEl.classList.add('error'); return; }
+
+      // Birthdate (21+)
+      const birthdate = document.getElementById('birthdate').value;
+      if (!birthdate) { statusEl.textContent = "Please enter your birthdate."; statusEl.classList.add('error'); return; }
+      const age = calcAgeYears(birthdate);
+      if (age < 21) { statusEl.textContent = "Applicants must be at least 21 years old."; statusEl.classList.add('error'); return; }
+
+      // Start date
+      const start_date = document.getElementById('start_date').value;
+      if (!start_date) { statusEl.textContent = "Please choose your earliest start date."; statusEl.classList.add('error'); return; }
+
+      // Required radios
+      const position_type = getRadioValue('position_type');
+      if (!position_type) { statusEl.textContent = "Please select a position type."; statusEl.classList.add('error'); return; }
+
+      const use_profile = getRadioValue('use_profile');
+      if (!use_profile) { statusEl.textContent = "Please select which best describes you."; statusEl.classList.add('error'); return; }
+
+      // Required textarea
+      if (!document.getElementById('availability_limits').value.trim()) {
+        statusEl.textContent = "Please describe any days/shifts you cannot work.";
+        statusEl.classList.add('error'); return;
+      }
+
+      statusEl.classList.remove('error');
+      statusEl.textContent = "Submitting...";
+
+      const params = {
+        company,
+        locations: locationsJoined,
+        first_name: document.getElementById('first_name').value || '',
+        last_name: document.getElementById('last_name').value || '',
+        email: document.getElementById('email').value || '',
+        phone: document.getElementById('phone').value || '',
+        position: document.getElementById('position').value || '',
+
+        birthdate,
+        age,
+        start_date,
+        position_type,
+        availability_limits: document.getElementById('availability_limits').value || '',
+        use_profile,
+        skills_knowledge: document.getElementById('skills_knowledge').value || '',
+        vape_experience: document.getElementById('vape_experience').value || '',
+
+        why_here: document.getElementById('why_here').value || '',
+        referred_by: document.getElementById('referred_by').value || ''
+      };
+
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+        statusEl.textContent = "✅ Application sent successfully!";
+        form.reset();
+        renderLocations(""); // reset locations
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ Failed to send. Please try again.";
+        statusEl.classList.add('error');
+      }
+    });
+  </script>
+</body>
+</html>
