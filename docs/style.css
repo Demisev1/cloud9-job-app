@@ -1,0 +1,7 @@
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:920px;margin:20px auto;padding:0 16px;line-height:1.4}
+h1,h2{margin:0 0 12px}header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+nav a{margin-right:12px}input,select,textarea{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%}button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer}
+.card{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:10px 0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.table{width:100%;border-collapse:collapse} .table th,.table td{border-bottom:1px solid #eee;padding:8px;text-align:left}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#f4f4f4}

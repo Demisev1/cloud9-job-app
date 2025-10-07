@@ -1,0 +1,113 @@
+<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin • Cloud 9 Jobs</title><link rel="stylesheet" href="style.css"><script src="config.js"></script><script src="api.js"></script></head>
+<body>
+<header><h1>Admin Dashboard</h1><nav><a href="index.html">Home</a> <a href="login.html">Login</a> <a href="apply.html">Apply</a></nav></header>
+
+<div class="card">
+  <h2>Locations</h2>
+  <div class="row">
+    <div><input id="loc_name" placeholder="Name"></div>
+    <div><input id="loc_phone" placeholder="Phone"></div>
+  </div>
+  <div class="row">
+    <div><input id="loc_address" placeholder="Address"></div>
+    <div><input id="loc_city" placeholder="City"></div>
+  </div>
+  <div class="row">
+    <div><input id="loc_state" placeholder="State"></div>
+    <div><input id="loc_zip" placeholder="ZIP"></div>
+  </div>
+  <p><button id="addLoc">Add Location</button></p>
+  <div id="locList"></div>
+</div>
+
+<div class="card">
+  <h2>Applications</h2>
+  <div class="row">
+    <div><input id="q" placeholder="Search name/email/phone/position"></div>
+    <div>
+      <select id="status">
+        <option value="">Any status</option>
+        <option>submitted</option><option>under_review</option><option>interview</option>
+        <option>hired</option><option>rejected</option><option>withdrawn</option>
+      </select>
+    </div>
+  </div>
+  <p><button id="loadApps">Load</button></p>
+  <div id="apps"></div>
+</div>
+
+<p id="msg"></p>
+
+<script>
+async function loadLocations(){
+  const locs = await api('/locations');
+  const html = '<table class="table"><thead><tr><th>ID</th><th>Name</th><th>City</th><th>Active</th><th>Actions</th></tr></thead><tbody>'+
+    locs.map(l => `<tr>
+      <td>${l.id}</td><td>${l.name||''}</td><td>${l.city||''}</td>
+      <td>${l.is_active? 'Yes':'No'}</td>
+      <td>
+        <button onclick="toggleLoc(${l.id}, ${l.is_active?0:1})">${l.is_active?'Deactivate':'Activate'}</button>
+        <button onclick="delLoc(${l.id})">Delete</button>
+      </td>
+    </tr>`).join('') + '</tbody></table>';
+  document.getElementById('locList').innerHTML = html;
+}
+async function addLoc(){
+  const body = {
+    name: document.getElementById('loc_name').value.trim(),
+    phone: document.getElementById('loc_phone').value.trim(),
+    address: document.getElementById('loc_address').value.trim(),
+    city: document.getElementById('loc_city').value.trim(),
+    state: document.getElementById('loc_state').value.trim(),
+    zip: document.getElementById('loc_zip').value.trim(),
+    is_active: 1
+  };
+  try { await api('/locations', { method:'POST', body: JSON.stringify(body) }); await loadLocations(); }
+  catch(e){ document.getElementById('msg').textContent = fmtErr(e); }
+}
+async function toggleLoc(id, active){
+  try { await api('/locations/'+id, { method:'PUT', body: JSON.stringify({ is_active: !!active }) }); await loadLocations(); }
+  catch(e){ document.getElementById('msg').textContent = fmtErr(e); }
+}
+async function delLoc(id){
+  if (!confirm('Delete location #' + id + '?')) return;
+  try { await api('/locations/'+id, { method:'DELETE' }); await loadLocations(); }
+  catch(e){ document.getElementById('msg').textContent = fmtErr(e); }
+}
+async function loadApps(){
+  const qs = new URLSearchParams();
+  const status = document.getElementById('status').value;
+  const q = document.getElementById('q').value.trim();
+  if (status) qs.set('status', status);
+  if (q) qs.set('q', q);
+  const rows = await api('/applications' + (qs.toString()?('?'+qs.toString()):''));
+  const html = '<table class="table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Position</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+    rows.map(r => `<tr>
+      <td>${r.id}</td><td>${r.full_name}</td><td>${r.email}</td><td>${r.phone||''}</td><td>${r.position||''}</td>
+      <td><span class="badge">${r.status}</span></td>
+      <td>
+        <select id="s_${r.id}">
+          <option ${r.status==='submitted'?'selected':''}>submitted</option>
+          <option ${r.status==='under_review'?'selected':''}>under_review</option>
+          <option ${r.status==='interview'?'selected':''}>interview</option>
+          <option ${r.status==='hired'?'selected':''}>hired</option>
+          <option ${r.status==='rejected'?'selected':''}>rejected</option>
+          <option ${r.status==='withdrawn'?'selected':''}>withdrawn</option>
+        </select>
+        <button onclick="saveStatus(${r.id})">Save</button>
+      </td>
+    </tr>`).join('') + '</tbody></table>';
+  document.getElementById('apps').innerHTML = html;
+}
+async function saveStatus(id){
+  const val = document.getElementById('s_'+id).value;
+  try { await api('/applications/'+id+'/status', { method:'PATCH', body: JSON.stringify({ status: val }) }); await loadApps(); }
+  catch(e){ document.getElementById('msg').textContent = fmtErr(e); }
+}
+
+document.getElementById('addLoc').onclick = addLoc;
+document.getElementById('loadApps').onclick = loadApps;
+loadLocations();
+</script>
+</body></html>
