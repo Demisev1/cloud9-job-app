@@ -1,16 +1,27 @@
-/* router.js (idempotent) */
+/* router.js */
 (function(){
-  if (window.__APP_ROUTER__) { console.log('[router] already initialized'); return; }
-  const appEl = () => document.getElementById('app');
+  const appEl = ()=> document.getElementById('app');
+  function setActive(){
+    const h = location.hash || '#/';
+    ['home','apply','locations','dash'].forEach(id=>{
+      const a = document.getElementById('nav-'+id); if (!a) return;
+      const wants = (id==='home' && (h==='#/' || h==='#')) ||
+                    (id==='apply' && h.startsWith('#/apply')) ||
+                    (id==='locations' && h.startsWith('#/locations')) ||
+                    (id==='dash' && (h.startsWith('#/dashboard')));
+      a.classList.toggle('active', !!wants);
+    });
+  }
   async function render(){
     const el = appEl(); if (!el) return;
-    const hash = (location.hash || '#/');
+    const h = location.hash || '#/';
+    setActive();
     try{
-      if (hash.startsWith('#/locations'))      return await window.viewLocations(el);
-      if (hash.startsWith('#/apply'))          return await window.viewApply(el);
-      if (hash.startsWith('#/login'))          return await window.viewLogin(el);
-      if (hash.startsWith('#/admin'))          return await window.viewAdmin(el);
-      if (hash.startsWith('#/dashboard'))      return await window.viewDashboard(el);
+      if (h.startsWith('#/locations')) return await window.viewLocations(el);
+      if (h.startsWith('#/apply')) return await window.viewApply(el);
+      if (h.startsWith('#/login')) return await window.viewLogin(el);
+      if (h.startsWith('#/dashboard')) return await window.viewDashboard(el);
+      if (h.startsWith('#/admin')) return await window.viewAdmin(el);
       return await window.viewHome(el);
     }catch(e){
       el.textContent = 'Render error: ' + (e.message||String(e));
@@ -19,7 +30,5 @@
   }
   window.addEventListener('hashchange', render);
   document.addEventListener('DOMContentLoaded', render);
-  window.__APP_ROUTER__ = { render };
-  console.log('[router] initialized');
   setTimeout(render, 0);
 })();
