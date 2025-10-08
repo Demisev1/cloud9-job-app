@@ -58,7 +58,9 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto p-4">
+  
+  <main id=\"app\" class=\"container mx-auto px-4 py-10\">Loading…</main>
+<main class="max-w-6xl mx-auto p-4">
     <!-- Views are injected here by router -->
     <div id="view"></div>
   </main>
@@ -142,6 +144,19 @@
       }catch(e){ set('err', e.message||String(e), 'err'); }
     })();
   </script>
+
+
+<script>
+  (function(){
+    if(!document.getElementById('app')){
+      var m=document.createElement('main');
+      m.id='app'; m.className='container mx-auto px-4 py-10';
+      m.textContent='Loading…';
+      var body=document.body; var before=document.querySelector('footer');
+      body.insertBefore(m, before||null);
+    }
+  })();
+</script>
 
 </body>
 </html>
