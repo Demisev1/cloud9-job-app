@@ -37,3 +37,11 @@ function badge(status) {
   };
   return h('span', {class:`badge ${map[status] || 'bg-slate-100 text-slate-700'}`}, status || 'Pending');
 }
+\n
+function brandLogo(brand){
+  if(!brand) return './assets/img/logo-cloud9.png';
+  const b = brand.toLowerCase();
+  if (b.includes('kratom')) return './assets/img/logo-kratomdepot.png';
+  return './assets/img/logo-cloud9.png';
+}
+\n

@@ -37,11 +37,14 @@ route('#/', async () => {
     if (error) { c.appendChild(h('p', {class:'text-rose-600'}, 'Error loading locations.')); return; }
     if (!data || data.length===0) { c.appendChild(h('p', {class:'text-slate-600'}, 'No locations yet.')); return; }
     data.forEach(loc => {
-      c.appendChild(h('div', {class:'p-4 rounded-xl border border-slate-200'}, [
-        h('h4', {class:'font-semibold'}, loc.store_name || 'Store'),
-        h('p', {class:'text-sm text-slate-600'}, loc.address || ''),
-        h('p', {class:'text-sm text-slate-600'}, loc.hours || ''),
-        loc.phone ? h('a', {href:`tel:${loc.phone}`, class:'text-sm text-brand-700 mt-1 underline inline-block'}, loc.phone) : ''
+      c.appendChild(h('div', {class:'p-4 rounded-xl border border-slate-200 flex items-start gap-3'}, [
+        h('img', {src: brandLogo(loc.brand), alt: loc.brand||'Brand', class:'w-10 h-10 rounded-full object-cover mt-1'}),
+        h('div', {}, [
+          h('h4', {class:'font-semibold'}, loc.store_name || 'Store'),
+          h('p', {class:'text-sm text-slate-600'}, loc.address || ''),
+          h('p', {class:'text-sm text-slate-600'}, loc.hours || ''),
+          loc.phone ? h('a', {href:`tel:${loc.phone}`, class:'text-sm text-brand-700 mt-1 underline inline-block'}, loc.phone) : ''
+        ])
       ]));
     });
   })();
@@ -285,10 +288,16 @@ route('#/locations', async () => {
   const wrap = h('div', {class:'grid md:grid-cols-3 gap-6'});
 
   // list
+  let brandFilter = 'all';
   const list = h('div', {class:'card p-6 md:col-span-2'}, [
     h('div', {class:'flex items-center justify-between mb-3'}, [
       h('h3', {class:'text-lg font-semibold'}, 'Store Locations'),
       h('a', {href:'#/', class:'text-brand-700 underline'}, 'Back to Home')
+    ]),
+    h('div', {class:'flex items-center gap-2 mb-4'}, [
+      h('button', {class:'btn btn-outline', onclick:()=>{brandFilter='all'; render();}}, 'All'),
+      h('button', {class:'btn btn-outline', onclick:()=>{brandFilter='Cloud 9 Vapes'; render();}}, 'Cloud 9 Vapes'),
+      h('button', {class:'btn btn-outline', onclick:()=>{brandFilter='The Hemp and Kratom Depot'; render();}}, 'The Hemp & Kratom Depot')
     ]),
     h('div', {id:'locList'}, spinner())
   ]);
@@ -304,6 +313,14 @@ route('#/locations', async () => {
     h('input', {class:'input', name:'address', placeholder:'Address'}),
     h('input', {class:'input', name:'hours', placeholder:'Hours (e.g., Mon–Sat: 9–8, Sun: 10–6)'}),
     h('input', {class:'input', name:'phone', placeholder:'Phone (optional)'}),
+    (function(){
+      const sel = h('select', {name:'brand', class:'input', required:true}, [
+        h('option', {value:''}, 'Brand'),
+        h('option', {value:'Cloud 9 Vapes'}, 'Cloud 9 Vapes'),
+        h('option', {value:'The Hemp and Kratom Depot'}, 'The Hemp and Kratom Depot')
+      ]);
+      return sel;
+    })(),
     h('div', {class:'flex gap-2'}, [
       h('button', {class:'btn btn-primary', type:'submit'}, 'Save'),
       h('button', {class:'btn btn-outline', type:'button', onclick:()=>{ form.reset(); selId=null; }}, 'Clear')
@@ -331,17 +348,23 @@ route('#/locations', async () => {
 
   // populate list with edit/delete buttons if admin
   (async()=>{
-    const { data, error } = await window.supabaseClient.from('locations').select('*').order('store_name');
+    let query = window.supabaseClient.from('locations').select('*').order('store_name');
+    if (brandFilter !== 'all') query = query.eq('brand', brandFilter);
+    const { data, error } = await query;
     const c = list.querySelector('#locList'); c.innerHTML='';
     if (error) { c.appendChild(h('p', {class:'text-rose-600'}, 'Failed to load locations.')); return; }
     if (!data?.length) { c.appendChild(h('p', {class:'text-slate-600'}, 'No locations yet.')); return; }
     data.forEach(l => {
       const row = h('div', {class:'border border-slate-200 rounded-xl p-3 mb-2'}, [
-        h('div', {class:'flex items-center justify-between'}, [
-          h('div', {}, [
-            h('div', {class:'font-medium'}, l.store_name),
-            h('div', {class:'text-sm text-slate-600'}, l.address || ''),
-            h('div', {class:'text-sm text-slate-600'}, l.hours || '')
+        h('div', {class:'flex items-start justify-between gap-3'}, [
+          h('div', {class:'flex items-start gap-3'}, [
+            h('img', {src: brandLogo(l.brand), alt: l.brand||'Brand', class:'w-10 h-10 rounded-full object-cover mt-1'}),
+            h('div', {}, [
+              h('div', {class:'font-medium'}, l.store_name),
+              h('div', {class:'text-sm text-slate-600'}, l.address || ''),
+              h('div', {class:'text-sm text-slate-600'}, l.hours || ''),
+              l.brand ? h('div', {class:'text-xs text-slate-500 mt-1'}, l.brand) : ''
+            ])
           ]),
           (user && isAdminEmail(user.email)) ? h('div', {class:'flex items-center gap-2'}, [
             h('button', {class:'btn btn-outline', onclick:()=>{
@@ -350,6 +373,7 @@ route('#/locations', async () => {
               form.address.value = l.address||'';
               form.hours.value = l.hours||'';
               form.phone.value = l.phone||'';
+              form.brand.value = l.brand||'';
             }}, 'Edit'),
             h('button', {class:'btn btn-outline', onclick: async()=>{
               if (!confirm('Delete this location?')) return;
