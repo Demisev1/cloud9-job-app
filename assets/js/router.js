@@ -1,12 +1,34 @@
+/* router.js (idempotent) */
+(function(){
+  if (window.__APP_ROUTER__) {
+    console.log('[router] already initialized');
+    return;
+  }
 
-const routes = {};
-function route(path, render) { routes[path] = render; }
-async function render() {
-  const hash = location.hash || '#/';
-  const view = document.getElementById('view');
-  view.innerHTML = '';
-  const renderFn = routes[hash.split('?')[0]] || routes['#/404'];
-  view.appendChild(await renderFn());
-}
-window.addEventListener('hashchange', render);
-window.addEventListener('load', render);
+  const appEl = () => document.getElementById('app');
+
+  async function render(){
+    const el = appEl();
+    if (!el) return;
+    const hash = (location.hash || '#/');
+    try {
+      if (hash.startsWith('#/locations'))      return await window.viewLocations(el);
+      if (hash.startsWith('#/apply'))          return await window.viewApply(el);
+      if (hash.startsWith('#/login'))          return await window.viewLogin(el);
+      if (hash.startsWith('#/admin'))          return await window.viewAdmin(el);
+      if (hash.startsWith('#/dashboard'))      return await window.viewDashboard(el);
+      return await window.viewHome(el);
+    } catch (e) {
+      el.textContent = 'Render error: ' + (e.message || String(e));
+      console.error(e);
+    }
+  }
+
+  window.addEventListener('hashchange', render);
+  document.addEventListener('DOMContentLoaded', render);
+  // expose
+  window.__APP_ROUTER__ = { render };
+  console.log('[router] initialized');
+  // Fire once in case scripts load after DOMContentLoaded
+  setTimeout(render, 0);
+})();
