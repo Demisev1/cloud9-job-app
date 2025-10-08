@@ -58,7 +58,9 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto p-4">
+  
+  <main id=\"app\" class=\"container mx-auto px-4 py-10\">Loading…</main>
+<main class="max-w-6xl mx-auto p-4">
     <!-- Views are injected here by router -->
     <div id="view"></div>
   </main>
@@ -141,6 +143,63 @@
         set('rt', location.hash||'#/','ok');
       }catch(e){ set('err', e.message||String(e), 'err'); }
     })();
+  </script>
+
+
+<script>
+  (function(){
+    if(!document.getElementById('app')){
+      var m=document.createElement('main');
+      m.id='app'; m.className='container mx-auto px-4 py-10';
+      m.textContent='Loading…';
+      var body=document.body; var before=document.querySelector('footer');
+      body.insertBefore(m, before||null);
+    }
+  })();
+</script>
+
+  <script>(function(){try{window.dispatchEvent(new HashChangeEvent("hashchange"));}catch(e){/* no-op */}})();</script>
+
+  <script>
+  // Hard-boot fallback: if router doesn't render in 800ms, paint a minimal home view.
+  (function(){
+    function byId(id){return document.getElementById(id);}
+    function empty(el){while(el && el.firstChild) el.removeChild(el.firstChild);}
+    function card(html){var d=document.createElement('div'); d.className='card p-4 mb-3'; d.innerHTML=html; return d;}
+
+    setTimeout(async function(){
+      var el = byId('app');
+      if(!el) return;
+      // consider it "blank" if only textContent is 'Loading…' or empty
+      var txt = (el.textContent||'').trim();
+      if (el.children.length === 0 || txt === '' || /^Loading/i.test(txt)){
+        try{
+          // Build supabase client safely even if window.supabaseClient exists
+          var sb = window.supabaseClient || (window.supabase && window.supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY));
+          if (!sb){ el.textContent = 'Unable to initialize app.'; return; }
+          empty(el);
+          var h = document.createElement('h2'); h.className='text-2xl font-semibold mb-3'; h.textContent='Join Cloud 9 Vapes / The Hemp and Kratom Depot'; el.appendChild(h);
+          var p = document.createElement('p'); p.className='text-slate-600 mb-6'; p.textContent='Apply in minutes, then track your application status by logging in.'; el.appendChild(p);
+          var linkRow = document.createElement('div'); linkRow.className='flex gap-4 mb-6'; linkRow.innerHTML='<a href="#/apply" class="btn btn-primary">Apply Now</a><a href="#/login" class="btn btn-outline">My Dashboard</a>'; el.appendChild(linkRow);
+          var locWrap = document.createElement('div'); locWrap.className='card p-4'; locWrap.innerHTML='<div class="flex items-center justify-between mb-2"><h3 class="font-semibold">Current Locations</h3><a class="text-brand-700 underline" href="#/locations">View all</a></div>'; el.appendChild(locWrap);
+          var list = document.createElement('div'); list.id='__fallbackLocs'; locWrap.appendChild(list);
+          var { data, error } = await sb.from('locations').select('*').order('store_name');
+          if (error){ list.textContent = error.message; return; }
+          data.forEach(function(loc){
+            var logo = (loc.brand||'').toLowerCase().includes('kratom') ? './assets/img/logo-kratomdepot.png' : './assets/img/logo-cloud9.png';
+            list.appendChild(card('<div class="flex items-start gap-3">'
+              + '<img src="'+logo+'" alt="brand" class="w-10 h-10 rounded-full object-cover mt-1"/>'
+              + '<div><div class="font-medium">'+ (loc.store_name||'Store') +'</div>'
+              + '<div class="text-sm text-slate-600">'+ (loc.address||'') +'</div>'
+              + (loc.hours?('<div class="text-sm text-slate-600">'+loc.hours+'</div>'):'')
+              + '</div></div>'));
+          });
+        }catch(e){
+          el.textContent = 'Render error: ' + (e.message||String(e));
+        }
+      }
+    }, 800);
+  })();
   </script>
 
 </body>
