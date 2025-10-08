@@ -78,7 +78,7 @@
   <!-- Config (user must copy example to config.js and fill keys) -->
   <script src="./assets/js/config.js"></script>
   <!-- Supabase CDN -->
-  <script src="https://esm.sh/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App scripts -->
   <script src="./assets/js/supa.js"></script>
   <script src="./assets/js/ui.js"></script>
@@ -87,5 +87,20 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+
+  <script>
+    // Basic runtime error surface to help debug on Pages
+    window.addEventListener('error', function(e){
+      const box = document.createElement('div');
+      box.style.position='fixed'; box.style.bottom='12px'; box.style.right='12px';
+      box.style.background='#fee2e2'; box.style.color='#991b1b';
+      box.style.padding='8px 10px'; box.style.borderRadius='10px'; box.style.fontSize='12px';
+      box.style.boxShadow='0 6px 16px rgba(0,0,0,.1)';
+      box.textContent = 'Error: ' + (e.message || 'See console');
+      document.body.appendChild(box);
+      setTimeout(()=>box.remove(), 6000);
+    });
+  </script>
+
 </body>
 </html>
