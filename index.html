@@ -78,15 +78,15 @@
   </footer>
 
   <!-- Config (user must copy example to config.js and fill keys) -->
-  <script src="./assets/js/config.js?v=1759885465"></script>
+  <script src="./assets/js/config.js?v=1759886448?v=1759885465"></script>
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.__VER__="1759885465";</script>
   <!-- App scripts -->
-  <script src="./assets/js/supa.js?v=1759885465"></script>
-  <script src="./assets/js/ui.js?v=1759885465"></script>
-  <script src="./assets/js/router.js?v=1759885465"></script>
-  <script src="./assets/js/views.js?v=1759885465"></script>
+  <script src="./assets/js/supa.js?v=1759886448?v=1759885465"></script>
+  <script src="./assets/js/ui.js?v=1759886448?v=1759885465"></script>
+  <script src="./assets/js/router.js?v=1759886448?v=1759885465"></script>
+  <script src="./assets/js/views.js?v=1759886448?v=1759885465"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
@@ -126,7 +126,7 @@
       function set(id, val, cls){var el=document.getElementById(id); if(!el) return; el.textContent = val; if(cls) el.className=cls;}
       window.addEventListener('error', function(e){ set('err', e.message||String(e), 'err'); });
       try{
-        if (!window.APP_CONFIG){ set('cfg','MISSING (assets/js/config.js)','err'); return; }
+        if (!window.APP_CONFIG){ set('cfg','MISSING (assets/js/config.js?v=1759886448)','err'); return; }
         set('cfg','OK','ok');
         set('rt','booting','');
         if (!window.supabase){ set('sb','supabase-js missing','err'); return; }
@@ -201,6 +201,16 @@
     }, 800);
   })();
   </script>
+
+
+  <!-- Config & libs START -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js?v=1759886448"></script>
+  <script src="assets/js/supa.js?v=1759886448"></script>
+  <script src="assets/js/ui.js?v=1759886448"></script>
+  <script src="assets/js/views.js?v=1759886448"></script>
+  <script src="assets/js/router.js?v=1759886448"></script>
+  <!-- Config & libs END -->
 
 </body>
 </html>
