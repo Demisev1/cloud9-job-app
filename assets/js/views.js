@@ -1,3 +1,14 @@
+/* views.js guard: ensure route() exists before any usage */
+(function(){
+  if (typeof window.route !== 'function') {
+    window.route = function(path){
+      if (path) { if (path[0] !== '#') path = '#' + path; location.hash = path; }
+      return location.hash || '#/';
+    };
+    console.log('[guard] route() defined by views.js');
+  }
+})();
+
 
 /** VIEWS */
 route('#/', async () => {

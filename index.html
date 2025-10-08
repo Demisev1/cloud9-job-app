@@ -188,31 +188,16 @@
   
 
 
+  
+
+
   <!-- Config & libs START -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/config.js?v=1759887542"></script>
-  <script src="assets/js/supa.js?v=1759887542"></script>
-  <script src="assets/js/ui-clean.js?v=1759887542"></script>
-  
-  <script>
-    // route-shim: ensures a global route() exists for views.js
-    (function(){
-      if (typeof window.route !== 'function') {
-        window.route = function(path){
-          if (path) {
-            if (path[0] !== '#') path = '#' + path;
-            location.hash = path;
-          }
-          return (location.hash || '#/');
-        };
-        console.log('[route-shim] route() installed');
-      }
-    })();
-  </script>
-
-  <script src="assets/js/views.js?v=1759887542"></script>
-  <script src="assets/js/views-shim.js?v=1759887542"></script>
-  <script src="assets/js/router.js?v=1759887542"></script>
+  <script src="assets/js/config.js?v=1759887737"></script>
+  <script src="assets/js/supa.js?v=1759887737"></script>
+  <script src="assets/js/ui-clean.js?v=1759887737"></script>
+  <script src="assets/js/views.js?v=1759887737"></script>
+  <script src="assets/js/router.js?v=1759887737"></script>
   <!-- Config & libs END -->
 
 </body>
