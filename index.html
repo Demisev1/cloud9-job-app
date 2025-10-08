@@ -76,14 +76,15 @@
   </footer>
 
   <!-- Config (user must copy example to config.js and fill keys) -->
-  <script src="./assets/js/config.js"></script>
+  <script src="./assets/js/config.js?v=1759885465"></script>
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.__VER__="1759885465";</script>
   <!-- App scripts -->
-  <script src="./assets/js/supa.js"></script>
-  <script src="./assets/js/ui.js"></script>
-  <script src="./assets/js/router.js"></script>
-  <script src="./assets/js/views.js"></script>
+  <script src="./assets/js/supa.js?v=1759885465"></script>
+  <script src="./assets/js/ui.js?v=1759885465"></script>
+  <script src="./assets/js/router.js?v=1759885465"></script>
+  <script src="./assets/js/views.js?v=1759885465"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
@@ -100,6 +101,46 @@
       document.body.appendChild(box);
       setTimeout(()=>box.remove(), 6000);
     });
+  </script>
+
+
+  <style>
+    #diag{position:fixed;bottom:12px;left:12px;max-width:48rem;background:#0b1220;color:#e2e8f0;
+      border:1px solid #334155;border-radius:12px;padding:10px 12px;font:12px/1.4 ui-sans-serif,system-ui;z-index:99999;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+    #diag b{color:#93c5fd} #diag .ok{color:#86efac} #diag .err{color:#fecaca}
+  </style>
+  <div id="diag">
+    <div><b>Diagnostics</b> v<span id="v"></span> · <span id="ts"></span></div>
+    <div>Config: <span id="cfg" class="">(loading)</span></div>
+    <div>Supabase: <span id="sb" class="">(loading)</span></div>
+    <div>Locations count: <span id="cnt" class="">(loading)</span></div>
+    <div>Router: <span id="rt">(loading)</span></div>
+    <div>Last error: <span id="err">(none)</span></div>
+  </div>
+  <script>
+    document.getElementById('v').textContent = window.__VER__||'n/a';
+    document.getElementById('ts').textContent = new Date().toLocaleTimeString();
+    (function(){
+      function set(id, val, cls){var el=document.getElementById(id); if(!el) return; el.textContent = val; if(cls) el.className=cls;}
+      window.addEventListener('error', function(e){ set('err', e.message||String(e), 'err'); });
+      try{
+        if (!window.APP_CONFIG){ set('cfg','MISSING (assets/js/config.js)','err'); return; }
+        set('cfg','OK','ok');
+        set('rt','booting','');
+        if (!window.supabase){ set('sb','supabase-js missing','err'); return; }
+        const c = window.supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+        set('sb','createClient OK','ok');
+        c.from('locations').select('id', { count:'exact', head:true }).then(({error, count})=>{
+          if(error){ set('cnt', error.message, 'err'); }
+          else { set('cnt', String(count||0), 'ok'); }
+        }).catch(e=> set('cnt', String(e), 'err'));
+        // simple router check
+        if (window.addEventListener){
+          window.addEventListener('hashchange', ()=>set('rt', location.hash||'#/','ok'));
+        }
+        set('rt', location.hash||'#/','ok');
+      }catch(e){ set('err', e.message||String(e), 'err'); }
+    })();
   </script>
 
 </body>
