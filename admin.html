@@ -59,16 +59,7 @@ tr:hover td{background:#0e1528}
     <div class="grid">
       <div class="controls">
         <input id="search" type="search" placeholder="Search name, email, phone">
-        <select id="filterLocation">
-          <option value="">All locations</option>
-          <option>Daphne</option>
-          <option>Hillcrest</option>
-          <option>Semmes</option>
-          <option>Airport</option>
-          <option>D'Iberville</option>
-          <option>Moss Point</option>
-          <option>Saraland</option>
-        </select>
+        <select id="filterLocation"><option value="">All locations</option></select>
         <select id="filterStatus">
           <option value="">All status</option>
           <option>new</option>
@@ -83,11 +74,23 @@ tr:hover td{background:#0e1528}
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="storePanel" style="margin-bottom:14px">
+  <h3 style="margin:0 0 12px 0">Store Manager</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <input id="storeName" placeholder="Store name (e.g., Daphne)" />
+    <input id="storeDetails" placeholder="Details (optional: address, phone)" style="min-width:320px" />
+    <button id="addStoreBtn" class="btn primary">Add store</button>
+  </div>
+  <table id="storesTable" style="width:100%">
+    <thead><tr><th style="text-align:left">Store</th><th style="text-align:left">Details</th><th>Action</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<div class="panel">
     <table id="appsTable">
       <thead>
         <tr>
-          <th>When</th><th>Name</th><th>Contact</th><th>Location</th><th>Status</th><th>Note</th>
+          <th>When</th><th>Name</th><th>Contact</th><th>Location</th><th>Status</th><th>Note</th><th>Action</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -107,8 +110,7 @@ tr:hover td{background:#0e1528}
     <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
     <div style="display:flex;gap:8px">
       <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
-      <button id="signupBtn" class="btn" style="flex:1">Create admin</button>
-    </div>
+      </div>
     <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
   </div>
 </div>
@@ -127,7 +129,6 @@ const authModal = document.getElementById("authModal");
 const adminEmail = document.getElementById("adminEmail");
 const adminPass  = document.getElementById("adminPass");
 const signinBtn  = document.getElementById("signinBtn");
-const signupBtn  = document.getElementById("signupBtn");
 const signinMsg  = document.getElementById("signinMsg");
 const logoutBtn  = document.getElementById("logoutBtn");
 
@@ -157,16 +158,8 @@ signinBtn.onclick = async () => {
   const { error } = await sb.auth.signInWithPassword({ email, password });
   signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
   if(!error) await gateAndInit();
+loadStores();
 };
-
-signupBtn.onclick = async () => {
-  const email=(adminEmail.value||'').trim();
-  const password=adminPass.value||'';
-  if(!email||!password){ signinMsg.textContent="Enter email and password."; return; }
-  const { error } = await sb.auth.signUp({ email, password });
-  signinMsg.textContent = error ? ("Error: " + error.message) : "Admin created. Check your inbox to confirm, then sign in.";
-};
-
 logoutBtn.onclick = async () => {
   await sb.auth.signOut();
   userBadge.textContent = "Signed out";
@@ -225,6 +218,7 @@ function renderRows(rows){
       <td>${r.location||""}</td>
       <td><span class="badge ${badgeClass}">${status}</span></td>
       <td>${r.note||""}</td>
+      <td><button class="btn" data-del="${r.id??''}" title="Delete">Delete</button></td>
     `;
     tbody.appendChild(tr);
   }
@@ -235,6 +229,88 @@ let cache = [];
 async function loadAndRender(){
   cache = await fetchApplications();
   renderRows(cache);
+  bindAppDeleteButtons();
+}
+
+
+// --- Stores ---
+const storesTbody = document.querySelector("#storesTable tbody");
+const storeName = document.getElementById("storeName");
+const storeDetails = document.getElementById("storeDetails");
+const addStoreBtn = document.getElementById("addStoreBtn");
+
+async function fetchStores(){
+  const { data, error } = await sb.from("stores").select("*").order("name", { ascending: true });
+  if(error){ console.error(error); return []; }
+  return data || [];
+}
+
+function populateLocationFilter(stores){
+  const sel = filterLocation;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">All locations</option>' + stores.map(s => `<option>${s.name}</option>`).join("");
+  // restore previous selection if still present
+  const opt = [...sel.options].find(o => o.value === val);
+  if(opt) sel.value = val;
+}
+
+function renderStores(rows){
+  storesTbody.innerHTML = "";
+  for(const s of rows){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.name||""}</td>
+      <td class="small">${s.details||""}</td>
+      <td><button class="btn" data-store-del="${s.id??''}">Delete</button></td>
+    `;
+    storesTbody.appendChild(tr);
+  }
+  // bind delete buttons
+  storesTbody.querySelectorAll("button[data-store-del]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-store-del");
+      if(!id){ alert("Missing store id"); return; }
+      if(!confirm("Delete this store?")) return;
+      const { error } = await sb.from("stores").delete().eq("id", id);
+      if(error){ alert("Delete failed: " + error.message); return; }
+      await loadStores();
+      // also refresh apps render so the filter remains consistent
+      renderRows(cache);
+  bindAppDeleteButtons();
+    });
+  });
+}
+
+async function addStore(){
+  const name = (storeName.value||"").trim();
+  const details = (storeDetails.value||"").trim();
+  if(!name){ alert("Enter a store name"); return; }
+  const { error } = await sb.from("stores").insert({ name, details });
+  if(error){ alert("Add failed: " + error.message); return; }
+  storeName.value = ""; storeDetails.value = "";
+  await loadStores();
+}
+
+async function loadStores(){
+  const rows = await fetchStores();
+  renderStores(rows);
+  populateLocationFilter(rows);
+}
+
+addStoreBtn?.addEventListener("click", addStore);
+
+// --- Application delete buttons ---
+function bindAppDeleteButtons(){
+  tbody.querySelectorAll("button[data-del]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-del");
+      if(!id){ alert("Missing application id"); return; }
+      if(!confirm("Delete this application?")) return;
+      const { error } = await sb.from("applications").delete().eq("id", id);
+      if(error){ alert("Delete failed: " + error.message); return; }
+      await loadAndRender();
+    });
+  });
 }
 
 // Triggers
@@ -243,6 +319,7 @@ refreshBtn.addEventListener("click", loadAndRender);
 
 // Init
 gateAndInit();
+loadStores();
 
 </script>
 </body>
