@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Admin Dashboard - Cloud 9 Vapes</title></head>
+<body>
+<header><h1>Cloud 9 Vapes Admin</h1></header>
+<div id="loginView">
+  <input id="adminEmail" type="email" placeholder="Email"/><br/>
+  <input id="adminPass" type="password" placeholder="Password"/><br/>
+  <button id="loginBtn">Login</button><p id="loginMsg" style="color:red;"></p>
+</div>
+<div id="adminView" style="display:none;">
+  <button id="logoutBtn">Logout</button>
+  <select id="locFilter"><option value="">All Locations</option><option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option><option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option></select>
+  <table border="1"><thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead><tbody id="appBody"></tbody></table>
+</div>
+<div id="editModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:20px;">
+  <select id="statusSelect"><option value="pending_review">Pending</option><option value="interview">Interview</option><option value="hired">Hired</option><option value="rejected">Rejected</option></select><br/><br/>
+  <button id="saveStatus">Save</button><button id="cancelEdit">Cancel</button>
+</div>
+<script type="module">
+import { sb } from './js/supabase.js';
+
+const email=document.getElementById('adminEmail'),pass=document.getElementById('adminPass'),login=document.getElementById('loginBtn'),msg=document.getElementById('loginMsg');
+const adminView=document.getElementById('adminView'),loginView=document.getElementById('loginView'),logout=document.getElementById('logoutBtn');
+const tbody=document.getElementById('appBody'),locFilter=document.getElementById('locFilter');
+const modal=document.getElementById('editModal'),statusSelect=document.getElementById('statusSelect'),saveBtn=document.getElementById('saveStatus'),cancelEdit=document.getElementById('cancelEdit');
+let current=null;
+
+login.onclick=async()=>{
+  const { error }=await sb.auth.signInWithPassword({email:email.value,password:pass.value});
+  if(error){msg.textContent=error.message;return;}
+  loginView.style.display='none';adminView.style.display='block';load();
+};
+logout.onclick=async()=>{await sb.auth.signOut();adminView.style.display='none';loginView.style.display='block';};
+async function load(){
+  let q=sb.from('applications').select('*').order('created_at',{ascending:false});
+  if(locFilter.value)q=q.eq('location',locFilter.value);
+  const {data,error}=await q;if(error){alert(error.message);return;}
+  tbody.innerHTML='';
+  data.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${a.first_name} ${a.last_name}</td><td>${a.email}</td><td>${a.location}</td><td>${a.hours}</td><td>${a.status}</td><td><button>Edit</button></td>`;
+    tr.querySelector('button').onclick=()=>{current=a;statusSelect.value=a.status;modal.style.display='block';};
+    tbody.appendChild(tr);
+  });
+}
+locFilter.onchange=load;
+cancelEdit.onclick=()=>modal.style.display='none';
+saveBtn.onclick=async()=>{
+  if(!current)return;
+  const {error}=await sb.from('applications').update({status:statusSelect.value}).eq('id',current.id);
+  if(error){alert(error.message);return;}
+  modal.style.display='none';load();
+};
+</script>
+</body>
+</html>

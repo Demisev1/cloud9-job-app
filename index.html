@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Apply at Cloud 9 Vapes</title>
+</head>
+<body>
+<header><img src="assets/logo.png" alt="Cloud 9 Vapes Logo" style="height:60px;"><h1>Join the Cloud 9 Vapes Team</h1></header>
+<main>
+<section id="apply">
+  <h2>Apply Now</h2>
+  <form id="applyForm">
+    <input name="first_name" placeholder="First Name" required>
+    <input name="last_name" placeholder="Last Name" required>
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="phone" placeholder="Phone">
+    <select name="location" required>
+      <option value="">Preferred Location</option>
+      <option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option>
+      <option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option>
+    </select>
+    <select name="hours" required>
+      <option value="">Desired Hours</option>
+      <option>Full-time</option><option>Part-time</option><option>Overnight</option>
+    </select>
+    <textarea name="about" placeholder="Tell us about yourself..."></textarea>
+    <button type="submit">Submit Application</button>
+  </form>
+  <p id="applyMsg"></p>
+</section>
+
+<section id="status">
+  <h2>Check Your Application Status</h2>
+  <form id="statusForm">
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="tracking_code" placeholder="Tracking Code" required>
+    <button type="submit">Check Status</button>
+  </form>
+  <div id="statusResult"></div>
+</section>
+</main>
+<script type="module">
+import { sb } from "./js/supabase.js";
+
+const applyForm=document.getElementById("applyForm");
+const applyMsg=document.getElementById("applyMsg");
+if(applyForm){
+ applyForm.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const fd=new FormData(applyForm);
+  const payload={p_email:fd.get("email"),p_phone:fd.get("phone"),p_first_name:fd.get("first_name"),p_last_name:fd.get("last_name"),p_location:fd.get("location"),p_about:fd.get("about"),p_start_date:null,p_hours:fd.get("hours")};
+  const {data,error}=await sb.rpc("create_application",payload);
+  if(error){applyMsg.textContent="Error: "+error.message;return;}
+  const code=data?.[0]?.tracking_code||"";
+  applyMsg.innerHTML=`Thanks! Your tracking code is <strong>${code}</strong>.`;
+  applyForm.reset();
+ });}
+
+const statusForm=document.getElementById("statusForm");
+const statusResult=document.getElementById("statusResult");
+if(statusForm){
+ statusForm.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const fd=new FormData(statusForm);
+  const {data,error}=await sb.rpc("check_status",{p_email:fd.get("email"),p_code:fd.get("tracking_code")});
+  if(error){statusResult.textContent="Error: "+error.message;return;}
+  if(!data||!data.length){statusResult.innerHTML="<p style='color:red'>No match found.</p>";return;}
+  const row=data[0];
+  statusResult.innerHTML=`<div class='card'><h3>Status: ${row.status}</h3><p>Location: ${row.location||""}</p><p>Notes: ${row.notes||"—"}</p></div>`;
+ });}
+</script>
+</body>
+</html>
