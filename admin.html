@@ -35,6 +35,7 @@ a.link:hover{text-decoration:underline}
 .note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
 .center{min-height:60vh;display:grid;place-items:center}
 label{font-size:13px;color:#cbd5e1}
+.small{color:#9ca3af;font-size:12px}
 </style>
 </head>
 <body>
@@ -48,17 +49,25 @@ label{font-size:13px;color:#cbd5e1}
 </header>
 
 <div class="container">
+  <!-- Sign-in card (email + password) -->
   <div id="signinView" class="card center">
     <div style="max-width:420px;width:100%">
       <h2 style="margin:0 0 10px 0">Admin Sign In</h2>
-      <p style="color:#a6adbb;margin-top:0">Enter your email to receive a one-time sign-in link.</p>
+      <p class="small" style="margin-top:0">Use your admin email & password.</p>
       <label for="adminEmail">Email</label>
-      <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin:6px 0 10px 0"/>
-      <button id="sendLinkBtn" class="btn primary" style="width:100%">Send sign-in link</button>
+      <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin-bottom:8px"/>
+      <label for="adminPass">Password</label>
+      <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
+      <div style="display:flex;gap:8px">
+        <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
+        <button id="signupBtn" class="btn" style="flex:1">Create admin</button>
+      </div>
       <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
+      <p class="small">Tip: If you forget your password, use Supabase Auth reset or have me re-enable magic links.</p>
     </div>
   </div>
 
+  <!-- Dashboard -->
   <div id="adminView" class="card" style="display:none">
     <div class="controls">
       <select id="filterLocation"><option value="">All locations</option></select>
@@ -94,6 +103,7 @@ label{font-size:13px;color:#cbd5e1}
   </div>
 </div>
 
+<!-- Edit modal -->
 <div class="modal" id="editModal">
   <div class="box">
     <h3>Edit Application</h3>
@@ -119,6 +129,7 @@ label{font-size:13px;color:#cbd5e1}
   </div>
 </div>
 
+<!-- About modal -->
 <div class="modal" id="aboutModal">
   <div class="box">
     <h3>About Applicant</h3>
@@ -134,26 +145,21 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON } from "./js/config.js";
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Allowed admin emails
+// Allowed admin emails (keep simple allowlist)
 const ALLOW = ["shane1661@gmail.com"];
 
+// UI
 const signinView = document.getElementById("signinView");
 const adminView  = document.getElementById("adminView");
 const adminEmail = document.getElementById("adminEmail");
-const sendLinkBtn = document.getElementById("sendLinkBtn");
-const signinMsg = document.getElementById("signinMsg");
-const logoutBtn = document.getElementById("logoutBtn");
+const adminPass  = document.getElementById("adminPass");
+const signinBtn  = document.getElementById("signinBtn");
+const signupBtn  = document.getElementById("signupBtn");
+const signinMsg  = document.getElementById("signinMsg");
+const logoutBtn  = document.getElementById("logoutBtn");
 
 function showSignin(){ signinView.style.display='grid'; adminView.style.display='none'; }
 function showAdmin(){ signinView.style.display='none'; adminView.style.display='block'; }
-
-sendLinkBtn.onclick = async () => {
-  const email = (adminEmail.value||'').trim().toLowerCase();
-  if(!email) { signinMsg.textContent = "Enter your email."; return; }
-  if(!ALLOW.includes(email)) { signinMsg.textContent = "You are not authorized for admin."; return; }
-  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
-  signinMsg.textContent = error ? ("Error: " + error.message) : "Check your email for a sign-in link.";
-};
 
 async function gate(){
   const { data: { user } } = await sb.auth.getUser();
@@ -165,12 +171,32 @@ async function gate(){
   return user;
 }
 
+signinBtn.onclick = async () => {
+  const email = (adminEmail.value||'').trim().toLowerCase();
+  const password = adminPass.value||'';
+  if(!email || !password) { signinMsg.textContent = "Enter email and password."; return; }
+  if(!ALLOW.includes(email)) { signinMsg.textContent = "You are not authorized for admin."; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
+  if(!error){ await loadFilters(); await loadData(); }
+};
+
+// Optional: allow creating the admin account (only if email is allow-listed)
+signupBtn.onclick = async () => {
+  const email = (adminEmail.value||'').trim().toLowerCase();
+  const password = adminPass.value||'';
+  if(!email || !password) { signinMsg.textContent = "Enter email and password."; return; }
+  if(!ALLOW.includes(email)) { signinMsg.textContent = "Not allowed to create admin for this email."; return; }
+  const { error } = await sb.auth.signUp({ email, password });
+  signinMsg.textContent = error ? ("Error: " + error.message) : "Admin account created. Now click Sign in.";
+};
+
 logoutBtn.onclick = async ()=>{
   await sb.auth.signOut();
   showSignin();
 };
 
-// ADMIN TABLE (same as v16)
+// ----- Admin table logic (same as before) -----
 const tbody = document.querySelector("#appsTable tbody");
 const filterLocation = document.getElementById("filterLocation");
 const filterStatus = document.getElementById("filterStatus");
