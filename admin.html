@@ -1,244 +1,275 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Admin — Cloud 9 Vapes</title>
-  <style>
-    :root { --bg:#0b0f1a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --line:#1f2937; }
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-    header{display:flex;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
-    header img{height:44px}
-    .container{max-width:1200px;margin:24px auto;padding:0 16px}
-    .card{background:#0b1020;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:18px;margin-bottom:16px}
-    input,select,button,textarea{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
-    textarea{min-height:100px}
-    button{cursor:pointer}
-    .primary{background:linear-gradient(90deg,#60a5fa,#22d3ee);color:#081020;border:none;font-weight:700}
-    .danger{background:#7f1d1d;border:none;color:#fff}
-    .hidden{display:none}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:middle}
-    .badge{padding:4px 8px;border-radius:8px;background:#1f2937}
-    #editModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
-    #editModal .box{background:#111827;border:1px solid #243040;border-radius:14px;padding:16px;width:420px}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cloud 9 Vapes — Admin</title>
+<link rel="icon" href="assets/logo.png"/>
+<style>
+:root{--bg:#0b0f1a;--panel:#0b1020;--ink:#e5e7eb;--muted:#a6adbb;--line:#1f2937;--brand1:#60a5fa;--brand2:#22d3ee;--radius:18px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+header{position:sticky;top:0;height:64px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #111827;background:rgba(10,14,24,.78);backdrop-filter:saturate(140%) blur(6px);z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.brand img{height:36px;width:auto;border-radius:10px}
+nav{margin-left:auto;display:flex;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;border:1px solid var(--line);text-decoration:none;color:var(--ink);cursor:pointer;background:transparent}
+.btn.primary{background:linear-gradient(90deg,var(--brand1),var(--brand2));color:#051126;border:none;font-weight:800}
+.container{max-width:1200px;margin:24px auto;padding:0 16px}
+.card{background:radial-gradient(900px 360px at 15% -10%,rgba(34,211,238,.08),transparent),var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+input,select,textarea{padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a1222;color:#e5e7eb}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid #162034;text-align:left;vertical-align:top}
+.table th{color:#a5f3fc}
+.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;color:#cbd5e1;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+a.link{color:#93c5fd;text-decoration:none}
+a.link:hover{text-decoration:underline}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
+.modal .box{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;max-width:520px;width:92%}
+.modal h3{margin:0 0 10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > *{flex:1}
+.note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
+</style>
 </head>
 <body>
 <header>
-  <img src="assets/logo.png" alt="Cloud 9 Vapes Logo">
-  <h1>Admin — Applications</h1>
+  <div class="brand"><img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/><span>Cloud 9 Vapes — Admin</span></div>
+  <nav>
+    <a class="btn" href="index.html">Home</a>
+    <a class="btn" href="apply.html">Apply</a>
+  </nav>
 </header>
 
-<div class="container" id="loginView">
-  <div class="card" style="max-width:380px">
-    <h2>Sign in</h2>
-    <div style="display:grid;gap:10px">
-      <input id="adminEmail" type="email" placeholder="Admin email"/>
-      <input id="adminPass" type="password" placeholder="Password"/>
-      <button id="loginBtn" class="primary">Login</button>
-      <p id="loginMsg" style="color:#fca5a5"></p>
-    </div>
-  </div>
-</div>
-
-<div class="container hidden" id="adminView">
+<div class="container">
   <div class="card">
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <strong>Applications Overview</strong>
-      <span id="rowCount" style="margin-left:auto;opacity:.8"></span>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div style="display:flex;gap:10px;margin:10px 0">
-      <label for="locFilter" style="min-width:120px;opacity:.85">Filter by location</label>
-      <select id="locFilter"></select>
+    <div class="controls">
+      <select id="filterLocation"><option value="">All locations</option></select>
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="pending_review">Pending review</option>
+        <option value="interview">Interview</option>
+        <option value="hired">Hired</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <input id="search" placeholder="Search name / email / phone"/>
+      <button id="refreshBtn" class="btn">Refresh</button>
+      <button id="newStoreBtn" class="btn">Add Store</button>
     </div>
 
-    <table>
+    <table class="table" id="appsTable">
       <thead>
         <tr>
-          <th>Applied</th><th>Start</th><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th>
+          <th>Applied</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Location</th>
+          <th>Hours</th>
+          <th>Start</th>
+          <th>Status</th>
+          <th>About</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="appBody"></tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>Manage Stores</h2>
-    <form id="addStoreForm" style="display:flex;gap:10px;flex-wrap:wrap">
-      <input id="storeName" placeholder="New store name" required/>
-      <input id="storeOrder" type="number" placeholder="Display order (optional)"/>
-      <button class="primary" type="submit">Add Store</button>
-    </form>
-    <table>
-      <thead><tr><th>Order</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="storesBody"></tbody>
+      <tbody></tbody>
     </table>
   </div>
 </div>
 
-<div id="editModal">
+<!-- Edit modal -->
+<div class="modal" id="editModal">
   <div class="box">
     <h3>Edit Application</h3>
-    <label>Status</label>
-    <select id="statusSelect" style="width:100%">
-      <option value="pending_review">Pending Review</option>
-      <option value="interview">Interview</option>
-      <option value="hired">Hired</option>
-      <option value="rejected">Rejected</option>
-    </select>
-    <label style="margin-top:10px;display:block">Note (visible to the applicant)</label>
-    <textarea id="noteInput" placeholder="e.g., Thanks for applying—expect an interview email this week."></textarea>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
-      <button id="saveStatus" class="primary">Save</button>
-      <button id="cancelEdit">Cancel</button>
+    <div class="row">
+      <div>
+        <label>Status</label><br/>
+        <select id="statusSelect">
+          <option value="pending_review">Pending review</option>
+          <option value="interview">Interview</option>
+          <option value="hired">Hired</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div>
+        <label>Public note (visible to applicant)</label><br/>
+        <textarea id="noteInput" placeholder="Optional note..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn primary" id="saveBtn">Save</button>
+      <button class="btn" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- About modal (full text) -->
+<div class="modal" id="aboutModal">
+  <div class="box">
+    <h3>About Applicant</h3>
+    <div id="aboutContent" class="note"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" id="aboutCloseBtn">Close</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-import { sb } from "./js/supabase.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { SUPABASE_URL, SUPABASE_ANON } from "./js/config.js";
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const email=document.getElementById('adminEmail');
-const pass=document.getElementById('adminPass');
-const loginBtn=document.getElementById('loginBtn');
-const loginMsg=document.getElementById('loginMsg');
+const tbody = document.querySelector("#appsTable tbody");
+const filterLocation = document.getElementById("filterLocation");
+const filterStatus = document.getElementById("filterStatus");
+const search = document.getElementById("search");
+const refreshBtn = document.getElementById("refreshBtn");
+const newStoreBtn = document.getElementById("newStoreBtn");
 
-const loginView=document.getElementById('loginView');
-const adminView=document.getElementById('adminView');
-const logoutBtn=document.getElementById('logoutBtn');
+const editModal = document.getElementById("editModal");
+const statusSelect = document.getElementById("statusSelect");
+const noteInput = document.getElementById("noteInput");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
 
-const tbody=document.getElementById('appBody');
-const locFilter=document.getElementById('locFilter');
-const rowCount=document.getElementById('rowCount');
+const aboutModal = document.getElementById("aboutModal");
+const aboutContent = document.getElementById("aboutContent");
+const aboutCloseBtn = document.getElementById("aboutCloseBtn");
 
-const modal=document.getElementById('editModal');
-const statusSelect=document.getElementById('statusSelect');
-const noteInput=document.getElementById('noteInput');
-const saveStatus=document.getElementById('saveStatus');
-const cancelEdit=document.getElementById('cancelEdit');
+let rows = [];
+let editingId = null;
 
-// Stores
-const addStoreForm=document.getElementById('addStoreForm');
-const storeName=document.getElementById('storeName');
-const storeOrder=document.getElementById('storeOrder');
-const storesBody=document.getElementById('storesBody');
+function openModal(m){ m.style.display='flex'; document.body.style.overflow='hidden'; }
+function closeModal(m){ m.style.display='none'; document.body.style.overflow='auto'; }
 
-let currentRow=null;
+cancelBtn.onclick = ()=> closeModal(editModal);
+aboutCloseBtn.onclick = ()=> closeModal(aboutModal);
 
-function show(el){ el.classList.remove('hidden'); }
-function hide(el){ el.classList.add('hidden'); }
-function openModal(){ modal.style.display='flex'; document.body.style.overflow='hidden'; }
-function closeModal(){ modal.style.display='none'; document.body.style.overflow='auto'; }
-
-loginBtn.onclick = async () => {
-  loginMsg.textContent='';
-  const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
-  if(error){ loginMsg.textContent = error.message; return; }
-  hide(loginView); show(adminView);
-  await Promise.all([loadStores(), loadTable()]);
+newStoreBtn.onclick = async ()=>{
+  const name = prompt("Store name");
+  if(!name) return;
+  const display_order = Number(prompt("Display order (number, optional)", "1")||"1");
+  const { error } = await sb.from("stores").insert({ name, display_order, is_active: true });
+  if(error) alert(error.message); else { await loadFilters(); await loadData(); }
 };
 
-logoutBtn.onclick = async () => {
-  await sb.auth.signOut();
-  hide(adminView); show(loginView);
-};
-
-async function loadStores(){
-  const { data, error } = await sb.from('stores').select('*').order('display_order',{ascending:true}).order('name',{ascending:true});
-  if(error){ alert(error.message); return; }
-  locFilter.innerHTML = '<option value="">' + 'All Locations' + '</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
-  storesBody.innerHTML='';
-  (data||[]).forEach(s=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${s.display_order ?? ''}</td><td>${s.name}</td><td>${s.is_active?'Active':'Hidden'}</td>
-    <td style="display:flex;gap:8px">
-      <button class="toggleBtn">${s.is_active?'Hide':'Activate'}</button>
-      <button class="delStore danger">Delete</button>
-    </td>`;
-    tr.querySelector('.toggleBtn').onclick = async ()=>{
-      const { error } = await sb.from('stores').update({ is_active: !s.is_active }).eq('id', s.id);
-      if(error){ alert(error.message); return; }
-      await loadStores();
-    };
-    tr.querySelector('.delStore').onclick = async ()=>{
-      if(!confirm('Delete this store? Existing applications keep their location text.')) return;
-      const { error } = await sb.from('stores').delete().eq('id', s.id);
-      if(error){ alert(error.message); return; }
-      await loadStores();
-    };
-    storesBody.appendChild(tr);
-  });
+async function loadFilters(){
+  // Load locations
+  const { data:stores } = await sb.from("stores").select("name").eq("is_active", true).order("display_order", {ascending:true});
+  const current = filterLocation.value;
+  filterLocation.innerHTML = '<option value="">All locations</option>' + (stores||[]).map(s=>`<option>${s.name}</option>`).join('');
+  filterLocation.value = current || "";
 }
 
-async function loadTable(filterLoc=''){
-  let q = sb.from('applications').select('*').order('created_at', { ascending:false });
-  if(filterLoc) q = q.eq('location', filterLoc);
-  const { data, error } = await q;
-  if(error){ alert(error.message); return; }
-  renderTable(data||[]);
+function sanitize(text){
+  return (text||"").replace(/[<>&]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
 }
 
-function renderTable(rows){
-  tbody.innerHTML='';
-  rows.forEach((a)=>{
-    const dateStr = a.applied_on ? new Date(a.applied_on).toLocaleDateString() : (a.created_at ? new Date(a.created_at).toLocaleDateString() : '');
-    const startStr = a.start_date ? new Date(a.start_date).toLocaleDateString() : '—';
-    const tr=document.createElement('tr');
+function matchesSearch(r, q){
+  if(!q) return true;
+  q = q.toLowerCase();
+  return (r.first_name||'').toLowerCase().includes(q)
+      || (r.last_name||'').toLowerCase().includes(q)
+      || (r.email||'').toLowerCase().includes(q)
+      || (r.phone||'').toLowerCase().includes(q);
+}
+
+async function loadData(){
+  let query = sb.from("applications").select("*").order("created_at", {ascending:false}).limit(500);
+  if(filterLocation.value){ query = query.eq("location", filterLocation.value); }
+  if(filterStatus.value){ query = query.eq("status", filterStatus.value); }
+  const { data, error } = await query;
+  if(error){ tbody.innerHTML = `<tr><td colspan="10">${error.message}</td></tr>`; return; }
+  rows = (data||[]).filter(r => matchesSearch(r, search.value));
+  render();
+}
+
+function render(){
+  tbody.innerHTML = "";
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    const applied = r.applied_on ? new Date(r.applied_on).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : "");
+    const start = r.start_date ? new Date(r.start_date).toLocaleDateString() : "—";
+    const aboutShort = sanitize((r.about||"").slice(0, 80)) + ((r.about||"").length>80 ? "…" : "");
     tr.innerHTML = `
-      <td>${dateStr}</td>
-      <td>${startStr}</td>
-      <td>${a.first_name||''} ${a.last_name||''}</td>
-      <td>${a.email||''}</td>
-      <td>${a.phone||''}</td>
-      <td>${a.location||''}</td>
-      <td>${a.hours||''}</td>
-      <td><span class='badge'>${a.status||''}</span></td>
-      <td style="display:flex;gap:8px">
-        <button class='editBtn'>Edit</button>
-        <button class='delBtn danger'>Delete</button>
-      </td>`;
-    tr.querySelector('.editBtn').onclick = () => { 
-      currentRow=a; 
-      statusSelect.value=a.status||'pending_review'; 
-      noteInput.value=a.notes||''; 
-      openModal(); 
-    };
-    tr.querySelector('.delBtn').onclick = async () => {
-      if(!confirm('Delete this application? This cannot be undone.')) return;
-      const { error } = await sb.from('applications').delete().eq('id', a.id);
-      if(error){ alert(error.message); return; }
-      await loadTable(locFilter?.value||'');
-    };
+      <td class="mono">${applied}</td>
+      <td>${sanitize(r.first_name)} ${sanitize(r.last_name)}</td>
+      <td><a class="link" href="mailto:${sanitize(r.email)}">${sanitize(r.email)}</a></td>
+      <td>${sanitize(r.phone||"")}</td>
+      <td>${sanitize(r.location||"")}</td>
+      <td>${sanitize(r.hours||"")}</td>
+      <td class="mono">${start}</td>
+      <td><span class="badge">${sanitize(r.status||"")}</span></td>
+      <td>
+        ${aboutShort ? aboutShort : "<span class='mono' style='opacity:.7'>—</span>"}
+        ${(r.about||"").length>0 ? ` <a href="#" class="link" data-about="${r.id}">View</a>` : ""}
+      </td>
+      <td class="actions">
+        <button class="btn" data-edit="${r.id}">Edit</button>
+        <button class="btn" data-del="${r.id}">Delete</button>
+      </td>
+    `;
     tbody.appendChild(tr);
   });
-  if(rowCount) rowCount.textContent = `${rows.length} ${rows.length===1?'result':'results'}`;
+
+  // Wire buttons
+  tbody.querySelectorAll("[data-edit]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-edit");
+      const r = rows.find(x=>String(x.id)===String(id));
+      if(!r) return;
+      editingId = r.id;
+      statusSelect.value = r.status || "pending_review";
+      noteInput.value = r.notes || "";
+      openModal(editModal);
+    });
+  });
+
+  tbody.querySelectorAll("[data-del]").forEach(b=>{
+    b.addEventListener("click", async ()=>{
+      const id = b.getAttribute("data-del");
+      if(!confirm("Delete this application?")) return;
+      const { error } = await sb.from("applications").delete().eq("id", id);
+      if(error) alert(error.message); else loadData();
+    });
+  });
+
+  tbody.querySelectorAll("[data-about]").forEach(a=>{
+    a.addEventListener("click", (e)=>{
+      e.preventDefault();
+      const id = a.getAttribute("data-about");
+      const r = rows.find(x=>String(x.id)===String(id));
+      aboutContent.innerHTML = sanitize(r?.about||"").replace(/\n/g,"<br/>");
+      openModal(aboutModal);
+    });
+  });
 }
 
-if(locFilter) locFilter.addEventListener('change', ()=> loadTable(locFilter.value||''));
-cancelEdit.onclick = closeModal;
-
-saveStatus.onclick = async () => {
-  if(!currentRow) return;
-  const payload = { status: statusSelect.value, notes: noteInput.value };
-  const { error } = await sb.from('applications').update(payload).eq('id', currentRow.id);
+saveBtn.onclick = async ()=>{
+  if(editingId==null) return;
+  const patch = { status: statusSelect.value, notes: noteInput.value };
+  const { error } = await sb.from("applications").update(patch).eq("id", editingId);
   if(error){ alert(error.message); return; }
-  closeModal();
-  await loadTable(locFilter?.value||'');
+  closeModal(editModal);
+  await loadData();
 };
 
-addStoreForm.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const name = storeName.value.trim();
-  const order = storeOrder.value ? parseInt(storeOrder.value,10): null;
-  if(!name) return;
-  const { error } = await sb.from('stores').insert({ name, display_order: order, is_active: true });
-  if(error){ alert(error.message); return; }
-  storeName.value=''; storeOrder.value='';
-  await loadStores();
-});
+filterLocation.onchange = loadData;
+filterStatus.onchange = loadData;
+search.oninput = ()=> { render(); };
 
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+refreshBtn.onclick = async ()=>{
+  await loadFilters();
+  await loadData();
+};
+
+// initial load
+await loadFilters();
+await loadData();
 </script>
 </body>
 </html>

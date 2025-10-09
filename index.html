@@ -4,228 +4,51 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Cloud 9 Vapes — Careers</title>
+<link rel="icon" href="assets/logo.png"/>
 <style>
-:root{--bg:#0b0f1a;--card:#0b1020;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
+:root{--bg:#0b0f1a;--panel:#0b1020;--ink:#e5e7eb;--muted:#a6adbb;--line:#1f2937;--brand1:#60a5fa;--brand2:#22d3ee;--radius:18px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,26,.85);backdrop-filter: blur(6px);z-index:10}
-header img{height:40px;width:auto}
-h1{margin:0;font-size:18px}
+html,body{margin:0;height:100%;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
+header{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #111827;background:rgba(10,14,24,.78);backdrop-filter:saturate(140%) blur(6px);z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.brand img{height:42px;width:auto;border-radius:12px}
 nav{margin-left:auto;display:flex;gap:10px}
-.navbtn{color:var(--text);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:12px}
-.navbtn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
-
-/* Full-screen HERO */
-.hero{min-height:100vh;display:grid;place-items:center;padding:40px 16px;background:
- radial-gradient(1200px 600px at 20% -10%, rgba(34,211,238,.10), transparent),
- radial-gradient(900px 400px at 90% 10%, rgba(96,165,250,.10), transparent);
- position:relative;}
-.hero-card{max-width:980px;margin:auto;text-align:center;padding:36px 28px;border-radius:22px;background:rgba(16,22,36,.6);border:1px solid rgba(255,255,255,.07);box-shadow:0 12px 40px rgba(0,0,0,.35)}
-.hero img{width:150px;height:auto;border-radius:16px;margin-bottom:16px}
-.hero h2{font-size:44px;margin:6px 0 10px 0;letter-spacing:.2px}
-.hero p{color:#cbd5e1;margin:0 0 22px 0}
-.hero .cta{display:inline-flex;gap:10px;align-items:center;padding:14px 22px;border-radius:16px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;text-decoration:none;font-weight:800;border:none}
-.hero .cta:hover{filter:brightness(1.06);transform:translateY(-1px)}
-.hero .subcta{display:block;margin-top:12px;color:#9ca3af;font-size:13px}
-.hero .down{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#9ca3af;font-size:13px;opacity:.8}
-
-/* Content */
-.container{max-width:1100px;margin:28px auto;padding:0 16px}
-.card{background:radial-gradient(900px 360px at 15% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
-.section-title{font-size:22px;margin:0 0 16px 0}
-
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.form-group{display:flex;flex-direction:column;gap:8px}
-label{font-size:13px;color:#cbd5e1}
-input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a1222;color:#e5e7eb}
-textarea{min-height:120px}
-button{cursor:pointer}
-button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
-.small{color:#9ca3af;font-size:12px}
-footer{color:#6b7280;text-align:center;margin:34px 0}
-.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
-.success{color:#a7f3d0}
-hr.sep{border:0;border-top:1px solid #162034;margin:18px 0}
-
-@media (max-width: 900px){
-  .form-grid,.form-grid-3{grid-template-columns:1fr}
-  .hero h2{font-size:32px}
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.btn.primary{background:linear-gradient(90deg,var(--brand1),var(--brand2));color:#051126;border:none;font-weight:800}
+main{min-height:100vh;display:grid;place-items:center;padding:90px 16px 40px 16px;background:radial-gradient(1400px 700px at 10% -10%,rgba(34,211,238,.10),transparent),radial-gradient(1000px 500px at 90% 0%,rgba(96,165,250,.10),transparent);}
+.card{max-width:1000px;margin:auto;text-align:center;padding:38px 28px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.07);box-shadow:0 14px 44px rgba(0,0,0,.35)}
+.card img{width:160px;height:auto;margin-bottom:12px}
+.h1{font-size:48px;letter-spacing:.2px;margin:6px 0 6px 0}
+.lead{color:var(--muted);max-width:760px;margin:0 auto 20px auto}
+.actions{display:flex;gap:12px;justify-content:center;margin-top:4px}
+.sub{color:#95a3b8;font-size:13px;margin-top:14px}
+footer{position:fixed;inset:auto 0 8px 0;text-align:center;color:#718096;font-size:12px}
+@media (max-width: 720px){ .h1{font-size:34px} .card img{width:120px} }
 </style>
 </head>
 <body>
 <header>
-  <img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/>
-  <h1>Cloud 9 Vapes — Careers</h1>
+  <div class="brand"><img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/><span>Cloud 9 Vapes — Careers</span></div>
   <nav>
-    <a class="navbtn" href="#home">Home</a>
-    <a class="navbtn" href="#apply">Apply</a>
-    <a class="navbtn primary" href="admin.html">Admin</a>
+    <a class="btn" href="apply.html">Apply</a>
+    <a class="btn primary" href="admin.html">Admin</a>
   </nav>
 </header>
 
-<!-- FULL-SCREEN HERO -->
-<section id="home" class="hero">
-  <div class="hero-card">
+<main>
+  <div class="card">
     <img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/>
-    <h2>Wanna join the team?</h2>
-    <p>We’re always looking for friendly people who love great customer service. It only takes a minute to apply.</p>
-    <a href="#apply" class="cta">Apply now</a>
-    <span class="subcta">Or scroll down</span>
-  </div>
-  <div class="down">▼ Scroll for the application form</div>
-</section>
-
-<div class="container">
-  <section id="apply" class="card">
-    <h2 class="section-title">Apply Now</h2>
-    <form id="applyForm">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="first_name">First Name</label>
-          <input id="first_name" name="first_name" placeholder="First Name" required/>
-        </div>
-        <div class="form-group">
-          <label for="last_name">Last Name</label>
-          <input id="last_name" name="last_name" placeholder="Last Name" required/>
-        </div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" placeholder="Email" required/>
-        </div>
-        <div class="form-group">
-          <label for="phone">Phone</label>
-          <input id="phone" name="phone" placeholder="Phone"/>
-        </div>
-      </div>
-
-      <div class="form-grid-3">
-        <div class="form-group">
-          <label for="storeSelect">Preferred Location</label>
-          <select name="location" id="storeSelect" required>
-            <option value="">Select a store</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="hours">Desired Hours</label>
-          <select id="hours" name="hours" required>
-            <option value="">Select hours</option>
-            <option>Full-time</option><option>Part-time</option><option>Overnight</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="start_date">Start date</label>
-          <input id="start_date" name="start_date" type="date" placeholder="Available start date (optional)"/>
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-top:8px">
-        <label for="about">Tell us about yourself</label>
-        <textarea id="about" name="about" placeholder="Tell us about yourself..."></textarea>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="appliedOn">Today’s date (saved with your application)</label>
-          <input name="applied_on" type="date" id="appliedOn" readonly style="opacity:.85"/>
-        </div>
-      </div>
-
-      <hr class="sep"/>
-      <button type="submit" class="primary" style="width:100%;">Submit Application</button>
-    </form>
-    <p id="applyMsg" class="small success"></p>
-  </section>
-
-  <section id="lookup" class="card" style="margin-top:18px">
-    <h2 class="section-title">Check Your Application</h2>
-    <div class="form-grid" style="grid-template-columns:2fr 1fr">
-      <div class="form-group">
-        <label for="lookupEmail">Email</label>
-        <input id="lookupEmail" type="email" placeholder="Enter your email" required/>
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <button id="lookupBtn" class="primary">View My Application</button>
-      </div>
+    <div class="h1">Wanna join the team?</div>
+    <p class="lead">We’re always looking for friendly, reliable people who love great customer service. It only takes a minute to apply.</p>
+    <div class="actions">
+      <a class="btn primary" href="apply.html">Apply now</a>
+      <a class="btn" href="apply.html#lookup">Check your application</a>
     </div>
-    <p class="small" id="lookupMsg"></p>
-    <div id="lookupResults"></div>
-  </section>
-</div>
+    <div class="sub">Questions? Visit the application page — you can also check status by email there.</div>
+  </div>
+</main>
 
-<footer>© <span id="year"></span> Cloud 9 Vapes Careers</footer>
-
-<script type="module">
-import { sb } from "./js/supabase.js";
-
-// Prefill today
-const appliedInput = document.getElementById('appliedOn');
-if(appliedInput) { appliedInput.valueAsDate = new Date(); }
-
-// Load stores
-async function loadStores(){
-  const sel = document.getElementById('storeSelect');
-  if(!sel) return;
-  const { data, error } = await sb.from('stores').select('name').eq('is_active', true).order('display_order', {ascending:true});
-  if(error){ console.warn(error.message); return; }
-  sel.innerHTML = '<option value="">' + 'Select a store' + '</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
-}
-loadStores();
-
-// Apply handler
-const applyForm=document.getElementById("applyForm");
-const applyMsg=document.getElementById("applyMsg");
-if(applyForm){
- applyForm.addEventListener("submit",async(e)=>{
-  e.preventDefault();
-  const fd=new FormData(applyForm);
-  const payload={p_email:fd.get("email"),p_phone:fd.get("phone"),p_first_name:fd.get("first_name"),p_last_name:fd.get("last_name"),p_location:fd.get("location"),p_about:fd.get("about"),p_start_date:fd.get("start_date")||null,p_hours:fd.get("hours"),p_applied_on:fd.get("applied_on")};
-  const {data,error}=await sb.rpc("create_application",payload);
-  if(error){applyMsg.textContent="Error: "+error.message;return;}
-  applyMsg.textContent="Thanks! Your application was submitted successfully.";
-  applyForm.reset();
-  if(appliedInput) appliedInput.valueAsDate=new Date();
- });
-}
-
-// Public lookup by email via RPC
-const lookupEmail=document.getElementById('lookupEmail');
-const lookupMsg=document.getElementById('lookupMsg');
-const lookupResults=document.getElementById('lookupResults');
-document.getElementById('lookupBtn').onclick = async ()=>{
-  const email = (lookupEmail.value||'').trim();
-  if(!email){ lookupMsg.textContent='Enter your email first.'; return; }
-  lookupMsg.textContent='';
-  lookupResults.innerHTML='';
-  const { data, error } = await sb.rpc('get_applications_by_email', { p_email: email });
-  if(error){ lookupMsg.textContent = error.message; return; }
-  if(!data || data.length===0){ lookupMsg.textContent='No applications found for that email yet.'; return; }
-  lookupMsg.textContent = `We found ${data.length} application${data.length>1?'s':''}.`;
-  data.forEach(r=>{
-    const card=document.createElement('div');
-    card.className='card';
-    card.style.marginTop='10px';
-    const applied = r.applied_on ? new Date(r.applied_on).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '');
-    const start = r.start_date ? new Date(r.start_date).toLocaleDateString() : '—';
-    card.innerHTML = `
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div><strong>${r.location||''}</strong> • <span class="badge">${r.status||''}</span></div>
-        <div class="small" style="opacity:.85;margin-left:auto">${applied}</div>
-      </div>
-      <div class="small" style="margin-top:6px">Hours: ${r.hours||''} • Start: ${start}</div>
-      ${r.notes ? `<div class="note"><strong>Note from hiring team:</strong><br>${r.notes}</div>` : ''}
-    `;
-    lookupResults.appendChild(card);
-  });
-};
-
-document.getElementById('year').textContent=new Date().getFullYear();
-</script>
+<footer>© <span id="yr"></span> Cloud 9 Vapes Careers</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
 </body>
 </html>
