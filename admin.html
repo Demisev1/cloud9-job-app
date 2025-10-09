@@ -56,7 +56,7 @@
     <table>
       <thead>
         <tr>
-          <th>Submitted</th><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th>
+          <th>Applied</th><th>Start</th><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="appBody"></tbody>
@@ -147,7 +147,7 @@ logoutBtn.onclick = async () => {
 async function loadStores(){
   const { data, error } = await sb.from('stores').select('*').order('display_order',{ascending:true}).order('name',{ascending:true});
   if(error){ alert(error.message); return; }
-  locFilter.innerHTML = '<option value="">All Locations</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
+  locFilter.innerHTML = '<option value="">' + 'All Locations' + '</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
   storesBody.innerHTML='';
   (data||[]).forEach(s=>{
     const tr=document.createElement('tr');
@@ -182,10 +182,12 @@ async function loadTable(filterLoc=''){
 function renderTable(rows){
   tbody.innerHTML='';
   rows.forEach((a)=>{
+    const dateStr = a.applied_on ? new Date(a.applied_on).toLocaleDateString() : (a.created_at ? new Date(a.created_at).toLocaleDateString() : '');
+    const startStr = a.start_date ? new Date(a.start_date).toLocaleDateString() : '—';
     const tr=document.createElement('tr');
-    const dateStr = a.created_at ? new Date(a.created_at).toLocaleString() : '';
     tr.innerHTML = `
       <td>${dateStr}</td>
+      <td>${startStr}</td>
       <td>${a.first_name||''} ${a.last_name||''}</td>
       <td>${a.email||''}</td>
       <td>${a.phone||''}</td>

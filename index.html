@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Cloud 9 Vapes — Careers</title>
 <style>
-:root{--bg:#0b0f1a;--card:#0c1220;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
+:root{--bg:#0b0f1a;--card:#0b1020;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
 header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,26,.85);backdrop-filter: blur(6px);}
 header img{height:40px;width:auto}
@@ -14,18 +14,19 @@ nav{margin-left:auto;display:flex;gap:10px}
 .navbtn{color:var(--text);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:12px}
 .navbtn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
 .container{max-width:1100px;margin:28px auto;padding:0 16px}
-.card{background:radial-gradient(800px 320px at 20% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.card{background:radial-gradient(900px 360px at 15% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:20px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .section-title{font-size:22px;margin:0 0 10px 0}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a1222;color:#e5e7eb}
 textarea{min-height:120px}
 button{cursor:pointer}
 button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
-.small{color:var(--muted);font-size:12px}
+.small{color:#9ca3af;font-size:12px}
 footer{color:#6b7280;text-align:center;margin:34px 0}
-.success{border-left:3px solid #22d3ee;padding-left:10px}
 .badge{padding:4px 8px;border-radius:8px;background:#1f2937}
-.hidden{display:none}
+.success{color:#a7f3d0}
+hr.sep{border:0;border-top:1px solid #162034;margin:18px 0}
 .note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
 </style>
 </head>
@@ -51,45 +52,33 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
         <input name="email" type="email" placeholder="Email" required/>
         <input name="phone" placeholder="Phone"/>
       </div>
-      <div class="grid2">
+      <div class="grid3">
         <select name="location" id="storeSelect" required>
           <option value="">Preferred Location</option>
         </select>
-        <div class="grid2" style="grid-template-columns:2fr 1fr;gap:10px">
-          <select name="hours" required>
-            <option value="">Desired Hours</option>
-            <option>Full-time</option><option>Part-time</option><option>Overnight</option>
-          </select>
-          <input name="start_date" type="date" placeholder="Start date (optional)"/>
-        </div>
+        <select name="hours" required>
+          <option value="">Desired Hours</option>
+          <option>Full-time</option><option>Part-time</option><option>Overnight</option>
+        </select>
+        <input name="start_date" type="date" placeholder="Available start date (optional)"/>
       </div>
       <textarea name="about" placeholder="Tell us about yourself..."></textarea>
+      <input name="applied_on" type="date" id="appliedOn" readonly style="opacity:.85"/>
+      <small class="small">Today’s date (saved with your application)</small>
+      <hr class="sep"/>
       <button type="submit" class="primary" style="width:100%;">Submit Application</button>
     </form>
-    <p id="applyMsg" class="small"></p>
+    <p id="applyMsg" class="small success"></p>
   </section>
 
-  <section id="auth" class="card" style="margin-top:18px">
-    <h2 class="section-title">Check Your Application — Sign up / Sign in</h2>
-    <div class="grid2" style="grid-template-columns:2fr 2fr">
-      <input id="loginEmail" type="email" placeholder="Email" required/>
-      <input id="loginPassword" type="password" placeholder="Password" required/>
+  <section id="lookup" class="card" style="margin-top:18px">
+    <h2 class="section-title">Check Your Application</h2>
+    <div class="grid2" style="grid-template-columns:2fr 1fr">
+      <input id="lookupEmail" type="email" placeholder="Enter your email" required/>
+      <button id="lookupBtn" class="primary">View My Application</button>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
-      <button id="signinBtn" class="primary">Sign in</button>
-      <button id="signupBtn">Create account</button>
-      <a href="#" id="resetLink" class="small">Forgot password?</a>
-    </div>
-    <p id="authMsg" class="small"></p>
-  </section>
-
-  <section id="myApps" class="card" style="margin-top:18px; display:none;">
-    <div style="display:flex;align-items:center;gap:8px">
-      <h2 class="section-title" style="margin:0">My Applications</h2>
-      <span id="whoami" class="small" style="margin-left:auto"></span>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div id="myAppsList"></div>
+    <p class="small" id="lookupMsg"></p>
+    <div id="lookupResults"></div>
   </section>
 </div>
 
@@ -98,87 +87,65 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
 <script type="module">
 import { sb } from "./js/supabase.js";
 
+// Prefill today
+const appliedInput = document.getElementById('appliedOn');
+if(appliedInput) { appliedInput.valueAsDate = new Date(); }
+
+// Load stores
 async function loadStores(){
   const sel = document.getElementById('storeSelect');
   if(!sel) return;
   const { data, error } = await sb.from('stores').select('name').eq('is_active', true).order('display_order', {ascending:true});
   if(error){ console.warn(error.message); return; }
-  sel.innerHTML = '<option value="">Preferred Location</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
+  sel.innerHTML = '<option value="">' + 'Preferred Location' + '</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
 }
 loadStores();
 
-// APPLY
+// Apply handler
 const applyForm=document.getElementById("applyForm");
 const applyMsg=document.getElementById("applyMsg");
 if(applyForm){
  applyForm.addEventListener("submit",async(e)=>{
   e.preventDefault();
   const fd=new FormData(applyForm);
-  const payload={p_email:fd.get("email"),p_phone:fd.get("phone"),p_first_name:fd.get("first_name"),p_last_name:fd.get("last_name"),p_location:fd.get("location"),p_about:fd.get("about"),p_start_date:fd.get("start_date")||null,p_hours:fd.get("hours")};
+  const payload={p_email:fd.get("email"),p_phone:fd.get("phone"),p_first_name:fd.get("first_name"),p_last_name:fd.get("last_name"),p_location:fd.get("location"),p_about:fd.get("about"),p_start_date:fd.get("start_date")||null,p_hours:fd.get("hours"),p_applied_on:fd.get("applied_on")};
   const {data,error}=await sb.rpc("create_application",payload);
   if(error){applyMsg.textContent="Error: "+error.message;return;}
-  const code=data?.[0]?.tracking_code||"";
-  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. You can create an account or sign in to view your status anytime.</span>`;
+  applyMsg.textContent="Thanks! Your application was submitted successfully.";
   applyForm.reset();
- });}
+  if(appliedInput) appliedInput.valueAsDate=new Date();
+ });
+}
 
-// SIMPLE AUTH (signin / signup)
-const authMsg=document.getElementById('authMsg');
-document.getElementById('signinBtn').onclick = async ()=>{
-  const email=document.getElementById('loginEmail').value;
-  const password=document.getElementById('loginPassword').value;
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  authMsg.textContent = error ? error.message : "Signed in! Loading your applications...";
-};
-document.getElementById('signupBtn').onclick = async ()=>{
-  const email=document.getElementById('loginEmail').value;
-  const password=document.getElementById('loginPassword').value;
-  const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: window.location.origin }});
-  if(error){ authMsg.textContent = error.message; return; }
-  if(data?.user?.identities?.length===0){ authMsg.textContent="Account exists. Try signing in."; return; }
-  authMsg.textContent = "Account created! Confirm via email, then sign in.";
-};
-document.getElementById('resetLink').onclick = async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value || prompt('Enter your account email for a reset link:');
-  if(!email) return;
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-  alert(error ? error.message : 'Reset link sent. Check your email.');
-};
-
-// My apps with notes
-const myApps=document.getElementById('myApps');
-const whoami=document.getElementById('whoami');
-const logoutBtn=document.getElementById('logoutBtn');
-const myAppsList=document.getElementById('myAppsList');
-
-async function renderMyApps(session){
-  if(!session){ myApps.style.display='none'; return; }
-  myApps.style.display='block';
-  whoami.textContent = session.user.email;
-  const { data, error } = await sb.from('applications').select('*').eq('email', session.user.email).order('created_at', {ascending:false});
-  if(error){ myAppsList.innerHTML = `<p class='small'>${error.message}</p>`; return; }
-  myAppsList.innerHTML='';
-  (data||[]).forEach(r=>{
+// Public lookup by email via RPC
+const lookupEmail=document.getElementById('lookupEmail');
+const lookupMsg=document.getElementById('lookupMsg');
+const lookupResults=document.getElementById('lookupResults');
+document.getElementById('lookupBtn').onclick = async ()=>{
+  const email = (lookupEmail.value||'').trim();
+  if(!email){ lookupMsg.textContent='Enter your email first.'; return; }
+  lookupMsg.textContent='';
+  lookupResults.innerHTML='';
+  const { data, error } = await sb.rpc('get_applications_by_email', { p_email: email });
+  if(error){ lookupMsg.textContent = error.message; return; }
+  if(!data || data.length===0){ lookupMsg.textContent='No applications found for that email yet.'; return; }
+  data.forEach(r=>{
     const card=document.createElement('div');
     card.className='card';
     card.style.marginTop='10px';
-    card.innerHTML=`
+    const applied = r.applied_on ? new Date(r.applied_on).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '');
+    const start = r.start_date ? new Date(r.start_date).toLocaleDateString() : '—';
+    card.innerHTML = `
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <div><strong>${r.location||''}</strong> • <span class="badge">${r.status||''}</span></div>
-        <div class="small" style="opacity:.85;margin-left:auto">${new Date(r.created_at).toLocaleString()}</div>
+        <div class="small" style="opacity:.85;margin-left:auto">${applied}</div>
       </div>
-      <div class="small" style="margin-top:6px">Hours: ${r.hours||''}</div>
+      <div class="small" style="margin-top:6px">Hours: ${r.hours||''} • Start: ${start}</div>
       ${r.notes ? `<div class="note"><strong>Note from hiring team:</strong><br>${r.notes}</div>` : ''}
     `;
-    myAppsList.appendChild(card);
+    lookupResults.appendChild(card);
   });
-}
-
-const { data: { session } } = await sb.auth.getSession();
-await renderMyApps(session);
-sb.auth.onAuthStateChange((_evt, session)=> renderMyApps(session));
-if(logoutBtn){ logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); await renderMyApps(null);}}
+};
 
 document.getElementById('year').textContent=new Date().getFullYear();
 </script>
