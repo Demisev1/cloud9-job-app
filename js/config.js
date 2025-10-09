@@ -1,2 +1,7 @@
-export const SUPABASE_URL="https://ynlishvnqanrucifqppe.supabase.co";
-export const SUPABASE_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlubGlzaHZucWFucnVjaWZxcHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NTExNjcsImV4cCI6MjA3NTUyNzE2N30.g_axD_jOzxtoAbYlbe2RCRplCNjrxCe-MmPvu74D3v0";
+// --- Supabase Client Config ---
+// Fill these in with your Supabase project's URL and anon key.
+export const SUPABASE_URL = localStorage.getItem("SUPABASE_URL") || "https://YOUR-PROJECT.supabase.co";
+export const SUPABASE_ANON = localStorage.getItem("SUPABASE_ANON") || "YOUR-ANON-KEY";
+// Tip: you can set them quickly from the browser console:
+// localStorage.setItem("SUPABASE_URL", "https://xxx.supabase.co");
+// localStorage.setItem("SUPABASE_ANON", "ey....");
