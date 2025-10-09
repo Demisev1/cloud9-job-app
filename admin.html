@@ -1,58 +1,168 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Admin Dashboard - Cloud 9 Vapes</title></head>
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard - Cloud 9 Vapes</title>
+
+<style>
+:root { --bg:#0b0f1a; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --accent:#60a5fa; --accent2:#22d3ee; }
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
+header{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #1f2937;background:rgba(11,15,26,.8);position:sticky;top:0}
+header img{height:48px}
+h1{margin:0;font-size:22px}
+main{max-width:900px;margin:24px auto;padding:0 16px;display:grid;gap:24px}
+section{background:linear-gradient(180deg,rgba(96,165,250,.06),transparent 30%),#0b1020;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:18px}
+form{display:grid;gap:10px}
+input,select,textarea,button{padding:10px 12px;border-radius:10px;border:1px solid #1f2937;background:#0b1020;color:var(--text)}
+button{cursor:pointer}
+button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:700}
+.card{background:#0b1020;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-top:10px}
+.small{color:var(--muted);font-size:12px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid #1f2937;padding:10px;text-align:left}
+.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
+.container{max-width:1000px;margin:24px auto;padding:0 16px}
+.hidden{display:none}
+#editModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);align-items:center;justify-content:center;z-index:50}
+#editModal .box{background:#111827;border:1px solid #243040;border-radius:14px;padding:16px;width:320px}
+</style>
+
+</head>
 <body>
-<header><h1>Cloud 9 Vapes Admin</h1></header>
-<div id="loginView">
-  <input id="adminEmail" type="email" placeholder="Email"/><br/>
-  <input id="adminPass" type="password" placeholder="Password"/><br/>
-  <button id="loginBtn">Login</button><p id="loginMsg" style="color:red;"></p>
+<header>
+  <img src="assets/logo.png" alt="Cloud 9 Vapes Logo">
+  <h1>Admin — Applications</h1>
+</header>
+
+<div class="container" id="loginView">
+  <section>
+    <h2>Sign in</h2>
+    <div style="display:grid;gap:10px;max-width:360px">
+      <input id="adminEmail" type="email" placeholder="Admin email"/>
+      <input id="adminPass" type="password" placeholder="Password"/>
+      <button id="loginBtn" class="primary">Login</button>
+      <p id="loginMsg" class="small" style="color:#fca5a5"></p>
+    </div>
+  </section>
 </div>
-<div id="adminView" style="display:none;">
-  <button id="logoutBtn">Logout</button>
-  <select id="locFilter"><option value="">All Locations</option><option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option><option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option></select>
-  <table border="1"><thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead><tbody id="appBody"></tbody></table>
+
+<div class="container hidden" id="adminView">
+  <section>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <strong>Applications Overview</strong>
+      <span class="small" id="rowCount" style="margin-left:auto">0 results</span>
+      <button id="logoutBtn" style="margin-left:8px">Logout</button>
+    </div>
+    <div style="display:flex;gap:10px;margin:10px 0">
+      <label class="small" for="locFilter" style="min-width:120px;opacity:.85">Filter by location</label>
+      <select id="locFilter">
+        <option value="">All Locations</option>
+        <option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option>
+        <option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option>
+      </select>
+    </div>
+
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="appBody"></tbody>
+    </table>
+  </section>
 </div>
-<div id="editModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:20px;">
-  <select id="statusSelect"><option value="pending_review">Pending</option><option value="interview">Interview</option><option value="hired">Hired</option><option value="rejected">Rejected</option></select><br/><br/>
-  <button id="saveStatus">Save</button><button id="cancelEdit">Cancel</button>
+
+<div id="editModal">
+  <div class="box">
+    <h3>Edit Status</h3>
+    <select id="statusSelect">
+      <option value="pending_review">Pending Review</option>
+      <option value="interview">Interview</option>
+      <option value="hired">Hired</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+      <button id="saveStatus" class="primary">Save</button>
+      <button id="cancelEdit">Cancel</button>
+    </div>
+  </div>
 </div>
+
 <script type="module">
-import { sb } from './js/supabase.js';
+import { sb } from "./js/supabase.js";
 
-const email=document.getElementById('adminEmail'),pass=document.getElementById('adminPass'),login=document.getElementById('loginBtn'),msg=document.getElementById('loginMsg');
-const adminView=document.getElementById('adminView'),loginView=document.getElementById('loginView'),logout=document.getElementById('logoutBtn');
-const tbody=document.getElementById('appBody'),locFilter=document.getElementById('locFilter');
-const modal=document.getElementById('editModal'),statusSelect=document.getElementById('statusSelect'),saveBtn=document.getElementById('saveStatus'),cancelEdit=document.getElementById('cancelEdit');
-let current=null;
+const email=document.getElementById('adminEmail');
+const pass=document.getElementById('adminPass');
+const loginBtn=document.getElementById('loginBtn');
+const loginMsg=document.getElementById('loginMsg');
 
-login.onclick=async()=>{
-  const { error }=await sb.auth.signInWithPassword({email:email.value,password:pass.value});
-  if(error){msg.textContent=error.message;return;}
-  loginView.style.display='none';adminView.style.display='block';load();
+const loginView=document.getElementById('loginView');
+const adminView=document.getElementById('adminView');
+const logoutBtn=document.getElementById('logoutBtn');
+
+const tbody=document.getElementById('appBody');
+const locFilter=document.getElementById('locFilter');
+const rowCount=document.getElementById('rowCount');
+
+const modal=document.getElementById('editModal');
+const statusSelect=document.getElementById('statusSelect');
+const saveStatus=document.getElementById('saveStatus');
+const cancelEdit=document.getElementById('cancelEdit');
+
+let currentRow=null;
+
+function show(el){ el.classList.remove('hidden'); }
+function hide(el){ el.classList.add('hidden'); }
+function openModal(){ modal.style.display='flex'; document.body.style.overflow='hidden'; }
+function closeModal(){ modal.style.display='none'; document.body.style.overflow='auto'; }
+
+loginBtn.onclick = async () => {
+  loginMsg.textContent='';
+  const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
+  if(error){ loginMsg.textContent = error.message; return; }
+  hide(loginView); show(adminView);
+  await loadTable();
 };
-logout.onclick=async()=>{await sb.auth.signOut();adminView.style.display='none';loginView.style.display='block';};
-async function load(){
-  let q=sb.from('applications').select('*').order('created_at',{ascending:false});
-  if(locFilter.value)q=q.eq('location',locFilter.value);
-  const {data,error}=await q;if(error){alert(error.message);return;}
+
+logoutBtn.onclick = async () => {
+  await sb.auth.signOut();
+  hide(adminView); show(loginView);
+};
+
+async function loadTable(filterLoc=''){
+  let q = sb.from('applications').select('*').order('created_at', { ascending:false });
+  if(filterLoc) q = q.eq('location', filterLoc);
+  const { data, error } = await q;
+  if(error){ alert(error.message); return; }
+  renderTable(data||[]);
+}
+
+function renderTable(rows){
   tbody.innerHTML='';
-  data.forEach(a=>{
+  rows.forEach((a)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${a.first_name} ${a.last_name}</td><td>${a.email}</td><td>${a.location}</td><td>${a.hours}</td><td>${a.status}</td><td><button>Edit</button></td>`;
-    tr.querySelector('button').onclick=()=>{current=a;statusSelect.value=a.status;modal.style.display='block';};
+    tr.innerHTML = `
+      <td>${a.first_name||''} ${a.last_name||''}</td>
+      <td>${a.email||''}</td>
+      <td>${a.location||''}</td>
+      <td>${a.hours||''}</td>
+      <td><span class='badge'>${a.status||''}</span></td>
+      <td><button>Edit</button></td>`;
+    tr.querySelector('button').onclick = () => { currentRow=a; statusSelect.value=a.status||'pending_review'; openModal(); };
     tbody.appendChild(tr);
   });
+  if(rowCount) rowCount.textContent = `${rows.length} ${rows.length===1?'result':'results'}`;
 }
-locFilter.onchange=load;
-cancelEdit.onclick=()=>modal.style.display='none';
-saveBtn.onclick=async()=>{
-  if(!current)return;
-  const {error}=await sb.from('applications').update({status:statusSelect.value}).eq('id',current.id);
-  if(error){alert(error.message);return;}
-  modal.style.display='none';load();
+
+if(locFilter) locFilter.addEventListener('change', ()=> loadTable(locFilter.value||''));
+cancelEdit.onclick = closeModal;
+
+saveStatus.onclick = async () => {
+  if(!currentRow) return;
+  const { error } = await sb.from('applications').update({ status: statusSelect.value }).eq('id', currentRow.id);
+  if(error){ alert(error.message); return; }
+  closeModal();
+  await loadTable(locFilter?.value||'');
 };
+
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 </script>
 </body>
 </html>
