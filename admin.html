@@ -54,9 +54,14 @@ small{color:#99a3b2}
 .center{min-height:50vh;display:grid;place-items:center}
 label{font-size:13px;color:#cbd5e1}
 .small{color:#9ca3af;font-size:12px}
+
+/* --- Auth gate: hide everything until signed in --- */
+body.locked #appShell{display:none !important;}
+
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="appShell">
 <header>
   <div class="brand"><img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/><span>Cloud 9 Vapes — Admin</span></div>
   <nav>
@@ -201,8 +206,8 @@ const signupBtn  = document.getElementById("signupBtn");
 const signinMsg  = document.getElementById("signinMsg");
 const logoutBtn  = document.getElementById("logoutBtn");
 
-function hideAuth(){ authModal.style.display='none'; }
-function showAuth(){ authModal.style.display='flex'; }
+function __hideAuth(){ authModal.style.display='none'; }
+function __showAuth(){ authModal.style.display='flex'; }
 
 signinBtn.onclick = async () => {
   const email=(adminEmail.value||'').trim().toLowerCase();
@@ -211,7 +216,7 @@ signinBtn.onclick = async () => {
   if(!ALLOW.includes(email)){ signinMsg.textContent="You are not authorized for admin."; return; }
   const { error } = await sb.auth.signInWithPassword({ email, password });
   signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
-  if(!error) hideAuth(), init();
+  if(!error) __hideAuth(), init();
 };
 
 signupBtn.onclick = async () => {
@@ -225,15 +230,20 @@ signupBtn.onclick = async () => {
 
 logoutBtn.onclick = async ()=>{
   await sb.auth.signOut();
-  showAuth();
+  ____showAuth();
 };
 
 async function gate(){
   const { data:{ user } } = await sb.auth.getUser();
   if(!user || !user.email || !ALLOW.includes(user.email.toLowerCase())){
-    showAuth(); return null;
+    ____showAuth(); return null;
   }
-  hideAuth(); return user;
+  __hideAuth(); return user;
+} } = await sb.auth.getUser();
+  if(!user || !user.email || !ALLOW.includes(user.email.toLowerCase())){
+    ____showAuth(); return null;
+  }
+  __hideAuth(); return user;
 }
 
 // ---------- Dashboard code ----------
@@ -412,6 +422,12 @@ async function init(){
   await loadData();
 }
 await gate(); await init();
+
+// --- Gate helpers: hide UI until authorized ---
+function ____showAuth(){ document.body.classList.add('locked'); const m=document.getElementById('authModal'); if(m) m.style.display='flex'; }
+function ____hideAuth(){ document.body.classList.remove('locked'); const m=document.getElementById('authModal'); if(m) m.style.display='none'; }
+
 </script>
+</div>
 </body>
 </html>
