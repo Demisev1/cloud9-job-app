@@ -25,10 +25,8 @@ button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));co
 footer{color:#6b7280;text-align:center;margin:34px 0}
 .success{border-left:3px solid #22d3ee;padding-left:10px}
 .badge{padding:4px 8px;border-radius:8px;background:#1f2937}
-.tab{display:flex;gap:10px;margin-bottom:10px}
-.tab button{border:1px solid var(--line);background:#0b1020}
-.tab button.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:700}
 .hidden{display:none}
+.note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -73,31 +71,16 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
 
   <section id="auth" class="card" style="margin-top:18px">
     <h2 class="section-title">Check Your Application — Sign up / Sign in</h2>
-    <div class="tab">
-      <button id="tabSignIn" class="active">Sign in</button>
-      <button id="tabSignUp">Create account</button>
+    <div class="grid2" style="grid-template-columns:2fr 2fr">
+      <input id="loginEmail" type="email" placeholder="Email" required/>
+      <input id="loginPassword" type="password" placeholder="Password" required/>
     </div>
-
-    <form id="signInForm">
-      <div class="grid2" style="grid-template-columns:2fr 2fr">
-        <input id="loginEmail" type="email" placeholder="Email" required/>
-        <input id="loginPassword" type="password" placeholder="Password" required/>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
-        <button type="submit" class="primary">Sign in</button>
-        <a href="#" id="resetLink" class="small">Forgot password?</a>
-      </div>
-      <p id="signinMsg" class="small"></p>
-    </form>
-
-    <form id="signUpForm" class="hidden">
-      <div class="grid2" style="grid-template-columns:2fr 2fr">
-        <input id="signupEmail" type="email" placeholder="Email" required/>
-        <input id="signupPassword" type="password" placeholder="Create password (min 6 chars)" required/>
-      </div>
-      <button type="submit" class="primary" style="margin-top:10px">Create account</button>
-      <p id="signupMsg" class="small"></p>
-    </form>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+      <button id="signinBtn" class="primary">Sign in</button>
+      <button id="signupBtn">Create account</button>
+      <a href="#" id="resetLink" class="small">Forgot password?</a>
+    </div>
+    <p id="authMsg" class="small"></p>
   </section>
 
   <section id="myApps" class="card" style="margin-top:18px; display:none;">
@@ -106,10 +89,7 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
       <span id="whoami" class="small" style="margin-left:auto"></span>
       <button id="logoutBtn">Logout</button>
     </div>
-    <table style="width:100%;border-collapse:collapse;margin-top:10px">
-      <thead><tr><th>Submitted</th><th>Location</th><th>Hours</th><th>Status</th></tr></thead>
-      <tbody id="myAppsBody"></tbody>
-    </table>
+    <div id="myAppsList"></div>
   </section>
 </div>
 
@@ -118,7 +98,6 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
 <script type="module">
 import { sb } from "./js/supabase.js";
 
-// Load stores for dropdown
 async function loadStores(){
   const sel = document.getElementById('storeSelect');
   if(!sel) return;
@@ -139,74 +118,66 @@ if(applyForm){
   const {data,error}=await sb.rpc("create_application",payload);
   if(error){applyMsg.textContent="Error: "+error.message;return;}
   const code=data?.[0]?.tracking_code||"";
-  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. You can now create an account or sign in to view your status anytime.</span>`;
+  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. You can create an account or sign in to view your status anytime.</span>`;
   applyForm.reset();
  });}
 
-// AUTH tabs
-const tabSignIn=document.getElementById('tabSignIn');
-const tabSignUp=document.getElementById('tabSignUp');
-const signInForm=document.getElementById('signInForm');
-const signUpForm=document.getElementById('signUpForm');
-tabSignIn.onclick=()=>{tabSignIn.classList.add('active');tabSignUp.classList.remove('active');signInForm.classList.remove('hidden');signUpForm.classList.add('hidden');}
-tabSignUp.onclick=()=>{tabSignUp.classList.add('active');tabSignIn.classList.remove('active');signUpForm.classList.remove('hidden');signInForm.classList.add('hidden');}
-
-// Sign up
-const signupMsg=document.getElementById('signupMsg');
-document.getElementById('signUpForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email=document.getElementById('signupEmail').value;
-  const password=document.getElementById('signupPassword').value;
-  const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: window.location.origin }});
-  if(error){ signupMsg.textContent = error.message; return; }
-  if(data?.user?.identities?.length===0){ signupMsg.textContent = "This email already has an account. Try signing in."; return; }
-  signupMsg.textContent = "Account created! Check your email to confirm, then sign in.";
-});
-
-// Sign in
-const signinMsg=document.getElementById('signinMsg');
-document.getElementById('signInForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
+// SIMPLE AUTH (signin / signup)
+const authMsg=document.getElementById('authMsg');
+document.getElementById('signinBtn').onclick = async ()=>{
   const email=document.getElementById('loginEmail').value;
   const password=document.getElementById('loginPassword').value;
   const { error } = await sb.auth.signInWithPassword({ email, password });
-  signinMsg.textContent = error ? error.message : "Signed in! Loading your applications...";
-});
-
-// Reset password
-const resetLink=document.getElementById('resetLink');
-resetLink.addEventListener('click', async (e)=>{
+  authMsg.textContent = error ? error.message : "Signed in! Loading your applications...";
+};
+document.getElementById('signupBtn').onclick = async ()=>{
+  const email=document.getElementById('loginEmail').value;
+  const password=document.getElementById('loginPassword').value;
+  const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: window.location.origin }});
+  if(error){ authMsg.textContent = error.message; return; }
+  if(data?.user?.identities?.length===0){ authMsg.textContent="Account exists. Try signing in."; return; }
+  authMsg.textContent = "Account created! Confirm via email, then sign in.";
+};
+document.getElementById('resetLink').onclick = async (e)=>{
   e.preventDefault();
-  const email = prompt('Enter your account email for reset link:');
+  const email = document.getElementById('loginEmail').value || prompt('Enter your account email for a reset link:');
   if(!email) return;
   const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
   alert(error ? error.message : 'Reset link sent. Check your email.');
-});
+};
 
-// My apps
+// My apps with notes
 const myApps=document.getElementById('myApps');
-const myAppsBody=document.getElementById('myAppsBody');
 const whoami=document.getElementById('whoami');
 const logoutBtn=document.getElementById('logoutBtn');
+const myAppsList=document.getElementById('myAppsList');
 
 async function renderMyApps(session){
   if(!session){ myApps.style.display='none'; return; }
   myApps.style.display='block';
   whoami.textContent = session.user.email;
   const { data, error } = await sb.from('applications').select('*').eq('email', session.user.email).order('created_at', {ascending:false});
-  if(error){ myAppsBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`; return; }
-  myAppsBody.innerHTML='';
+  if(error){ myAppsList.innerHTML = `<p class='small'>${error.message}</p>`; return; }
+  myAppsList.innerHTML='';
   (data||[]).forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${new Date(r.created_at).toLocaleString()}</td><td>${r.location||''}</td><td>${r.hours||''}</td><td><span class="badge">${r.status||''}</span></td>`;
-    myAppsBody.appendChild(tr);
+    const card=document.createElement('div');
+    card.className='card';
+    card.style.marginTop='10px';
+    card.innerHTML=`
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div><strong>${r.location||''}</strong> • <span class="badge">${r.status||''}</span></div>
+        <div class="small" style="opacity:.85;margin-left:auto">${new Date(r.created_at).toLocaleString()}</div>
+      </div>
+      <div class="small" style="margin-top:6px">Hours: ${r.hours||''}</div>
+      ${r.notes ? `<div class="note"><strong>Note from hiring team:</strong><br>${r.notes}</div>` : ''}
+    `;
+    myAppsList.appendChild(card);
   });
 }
 
 const { data: { session } } = await sb.auth.getSession();
 await renderMyApps(session);
 sb.auth.onAuthStateChange((_evt, session)=> renderMyApps(session));
-
 if(logoutBtn){ logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); await renderMyApps(null);}}
 
 document.getElementById('year').textContent=new Date().getFullYear();
