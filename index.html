@@ -17,7 +17,7 @@ nav{margin-left:auto;display:flex;gap:10px}
 .card{background:radial-gradient(800px 320px at 20% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .section-title{font-size:22px;margin:0 0 10px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:#e5e7eb}
+input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
 textarea{min-height:120px}
 button{cursor:pointer}
 button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
@@ -25,6 +25,10 @@ button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));co
 footer{color:#6b7280;text-align:center;margin:34px 0}
 .success{border-left:3px solid #22d3ee;padding-left:10px}
 .badge{padding:4px 8px;border-radius:8px;background:#1f2937}
+.tab{display:flex;gap:10px;margin-bottom:10px}
+.tab button{border:1px solid var(--line);background:#0b1020}
+.tab button.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:700}
+.hidden{display:none}
 </style>
 </head>
 <body>
@@ -33,7 +37,6 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
   <h1>Cloud 9 Vapes — Careers</h1>
   <nav>
     <a class="navbtn" href="#apply">Apply</a>
-    <a class="navbtn" href="#status">Check Status</a>
     <a class="navbtn primary" href="admin.html">Admin</a>
   </nav>
 </header>
@@ -68,25 +71,33 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
     <p id="applyMsg" class="small"></p>
   </section>
 
-  <section id="status" class="card" style="margin-top:18px">
-    <h2 class="section-title">Check Your Application Status</h2>
-    <form id="statusForm">
-      <div class="grid2">
-        <input name="email" type="email" placeholder="Email" required/>
-        <input name="tracking_code" placeholder="Tracking Code" required/>
-      </div>
-      <button type="submit">Check Status</button>
-    </form>
-    <div id="statusResult"></div>
-  </section>
+  <section id="auth" class="card" style="margin-top:18px">
+    <h2 class="section-title">Check Your Application — Sign up / Sign in</h2>
+    <div class="tab">
+      <button id="tabSignIn" class="active">Sign in</button>
+      <button id="tabSignUp">Create account</button>
+    </div>
 
-  <section id="login" class="card" style="margin-top:18px">
-    <h2 class="section-title">Sign in to View Your Applications</h2>
-    <form id="magicForm" class="grid2" style="grid-template-columns:2fr 1fr">
-      <input id="magicEmail" type="email" placeholder="Your email" required/>
-      <button type="submit" class="primary">Send Magic Link</button>
+    <form id="signInForm">
+      <div class="grid2" style="grid-template-columns:2fr 2fr">
+        <input id="loginEmail" type="email" placeholder="Email" required/>
+        <input id="loginPassword" type="password" placeholder="Password" required/>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+        <button type="submit" class="primary">Sign in</button>
+        <a href="#" id="resetLink" class="small">Forgot password?</a>
+      </div>
+      <p id="signinMsg" class="small"></p>
     </form>
-    <p id="magicMsg" class="small"></p>
+
+    <form id="signUpForm" class="hidden">
+      <div class="grid2" style="grid-template-columns:2fr 2fr">
+        <input id="signupEmail" type="email" placeholder="Email" required/>
+        <input id="signupPassword" type="password" placeholder="Create password (min 6 chars)" required/>
+      </div>
+      <button type="submit" class="primary" style="margin-top:10px">Create account</button>
+      <p id="signupMsg" class="small"></p>
+    </form>
   </section>
 
   <section id="myApps" class="card" style="margin-top:18px; display:none;">
@@ -107,6 +118,7 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
 <script type="module">
 import { sb } from "./js/supabase.js";
 
+// Load stores for dropdown
 async function loadStores(){
   const sel = document.getElementById('storeSelect');
   if(!sel) return;
@@ -127,37 +139,51 @@ if(applyForm){
   const {data,error}=await sb.rpc("create_application",payload);
   if(error){applyMsg.textContent="Error: "+error.message;return;}
   const code=data?.[0]?.tracking_code||"";
-  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. Keep it safe.</span>`;
+  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. You can now create an account or sign in to view your status anytime.</span>`;
   applyForm.reset();
  });}
 
-// STATUS (email + code)
-const statusForm=document.getElementById("statusForm");
-const statusResult=document.getElementById("statusResult");
-if(statusForm){
- statusForm.addEventListener("submit",async(e)=>{
-  e.preventDefault();
-  const fd=new FormData(statusForm);
-  const {data,error}=await sb.rpc("check_status",{p_email:fd.get("email"),p_code:fd.get("tracking_code")});
-  if(error){statusResult.textContent="Error: "+error.message;return;}
-  if(!data||!data.length){statusResult.innerHTML="<p class='small' style='color:#ef4444'>No match found.</p>";return;}
-  const row=data[0];
-  statusResult.innerHTML=`<div class='card'><h3>Status: ${row.status}</h3><p>Submitted: ${new Date(row.created_at).toLocaleString()}</p><p>Location: ${row.location||""}</p><p>Notes: ${row.notes||"—"}</p></div>`;
- });}
+// AUTH tabs
+const tabSignIn=document.getElementById('tabSignIn');
+const tabSignUp=document.getElementById('tabSignUp');
+const signInForm=document.getElementById('signInForm');
+const signUpForm=document.getElementById('signUpForm');
+tabSignIn.onclick=()=>{tabSignIn.classList.add('active');tabSignUp.classList.remove('active');signInForm.classList.remove('hidden');signUpForm.classList.add('hidden');}
+tabSignUp.onclick=()=>{tabSignUp.classList.add('active');tabSignIn.classList.remove('active');signUpForm.classList.remove('hidden');signInForm.classList.add('hidden');}
 
-// Magic link login
-const magicForm=document.getElementById('magicForm');
-const magicMsg=document.getElementById('magicMsg');
-if(magicForm){
- magicForm.addEventListener('submit', async (e)=>{
+// Sign up
+const signupMsg=document.getElementById('signupMsg');
+document.getElementById('signUpForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
-  const email=document.getElementById('magicEmail').value;
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin } });
-  if(error){ magicMsg.textContent = error.message; return; }
-  magicMsg.textContent = "Check your email for a login link. After clicking it, you'll be signed in here.";
- });
-}
+  const email=document.getElementById('signupEmail').value;
+  const password=document.getElementById('signupPassword').value;
+  const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: window.location.origin }});
+  if(error){ signupMsg.textContent = error.message; return; }
+  if(data?.user?.identities?.length===0){ signupMsg.textContent = "This email already has an account. Try signing in."; return; }
+  signupMsg.textContent = "Account created! Check your email to confirm, then sign in.";
+});
 
+// Sign in
+const signinMsg=document.getElementById('signinMsg');
+document.getElementById('signInForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email=document.getElementById('loginEmail').value;
+  const password=document.getElementById('loginPassword').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  signinMsg.textContent = error ? error.message : "Signed in! Loading your applications...";
+});
+
+// Reset password
+const resetLink=document.getElementById('resetLink');
+resetLink.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  const email = prompt('Enter your account email for reset link:');
+  if(!email) return;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+  alert(error ? error.message : 'Reset link sent. Check your email.');
+});
+
+// My apps
 const myApps=document.getElementById('myApps');
 const myAppsBody=document.getElementById('myAppsBody');
 const whoami=document.getElementById('whoami');
@@ -180,6 +206,7 @@ async function renderMyApps(session){
 const { data: { session } } = await sb.auth.getSession();
 await renderMyApps(session);
 sb.auth.onAuthStateChange((_evt, session)=> renderMyApps(session));
+
 if(logoutBtn){ logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); await renderMyApps(null);}}
 
 document.getElementById('year').textContent=new Date().getFullYear();
