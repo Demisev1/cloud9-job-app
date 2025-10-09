@@ -8,7 +8,7 @@
 :root{--bg:#0b0f1a;--card:#0c1220;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
 header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,26,.85);backdrop-filter: blur(6px);}
-header img{height:38px;width:auto}
+header img{height:40px;width:auto}
 h1{margin:0;font-size:18px}
 nav{margin-left:auto;display:flex;gap:10px}
 .navbtn{color:var(--text);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:12px}
@@ -17,13 +17,14 @@ nav{margin-left:auto;display:flex;gap:10px}
 .card{background:radial-gradient(800px 320px at 20% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .section-title{font-size:22px;margin:0 0 10px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
+input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:#e5e7eb}
 textarea{min-height:120px}
 button{cursor:pointer}
 button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
 .small{color:var(--muted);font-size:12px}
 footer{color:#6b7280;text-align:center;margin:34px 0}
 .success{border-left:3px solid #22d3ee;padding-left:10px}
+.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
 </style>
 </head>
 <body>
@@ -50,10 +51,8 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
         <input name="phone" placeholder="Phone"/>
       </div>
       <div class="grid2">
-        <select name="location" required>
+        <select name="location" id="storeSelect" required>
           <option value="">Preferred Location</option>
-          <option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option>
-          <option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option>
         </select>
         <div class="grid2" style="grid-template-columns:2fr 1fr;gap:10px">
           <select name="hours" required>
@@ -80,12 +79,42 @@ footer{color:#6b7280;text-align:center;margin:34px 0}
     </form>
     <div id="statusResult"></div>
   </section>
+
+  <section id="login" class="card" style="margin-top:18px">
+    <h2 class="section-title">Sign in to View Your Applications</h2>
+    <form id="magicForm" class="grid2" style="grid-template-columns:2fr 1fr">
+      <input id="magicEmail" type="email" placeholder="Your email" required/>
+      <button type="submit" class="primary">Send Magic Link</button>
+    </form>
+    <p id="magicMsg" class="small"></p>
+  </section>
+
+  <section id="myApps" class="card" style="margin-top:18px; display:none;">
+    <div style="display:flex;align-items:center;gap:8px">
+      <h2 class="section-title" style="margin:0">My Applications</h2>
+      <span id="whoami" class="small" style="margin-left:auto"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px">
+      <thead><tr><th>Submitted</th><th>Location</th><th>Hours</th><th>Status</th></tr></thead>
+      <tbody id="myAppsBody"></tbody>
+    </table>
+  </section>
 </div>
 
 <footer>© <span id="year"></span> Cloud 9 Vapes Careers</footer>
 
 <script type="module">
 import { sb } from "./js/supabase.js";
+
+async function loadStores(){
+  const sel = document.getElementById('storeSelect');
+  if(!sel) return;
+  const { data, error } = await sb.from('stores').select('name').eq('is_active', true).order('display_order', {ascending:true});
+  if(error){ console.warn(error.message); return; }
+  sel.innerHTML = '<option value="">Preferred Location</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
+}
+loadStores();
 
 // APPLY
 const applyForm=document.getElementById("applyForm");
@@ -102,7 +131,7 @@ if(applyForm){
   applyForm.reset();
  });}
 
-// STATUS
+// STATUS (email + code)
 const statusForm=document.getElementById("statusForm");
 const statusResult=document.getElementById("statusResult");
 if(statusForm){
@@ -115,6 +144,43 @@ if(statusForm){
   const row=data[0];
   statusResult.innerHTML=`<div class='card'><h3>Status: ${row.status}</h3><p>Submitted: ${new Date(row.created_at).toLocaleString()}</p><p>Location: ${row.location||""}</p><p>Notes: ${row.notes||"—"}</p></div>`;
  });}
+
+// Magic link login
+const magicForm=document.getElementById('magicForm');
+const magicMsg=document.getElementById('magicMsg');
+if(magicForm){
+ magicForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email=document.getElementById('magicEmail').value;
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin } });
+  if(error){ magicMsg.textContent = error.message; return; }
+  magicMsg.textContent = "Check your email for a login link. After clicking it, you'll be signed in here.";
+ });
+}
+
+const myApps=document.getElementById('myApps');
+const myAppsBody=document.getElementById('myAppsBody');
+const whoami=document.getElementById('whoami');
+const logoutBtn=document.getElementById('logoutBtn');
+
+async function renderMyApps(session){
+  if(!session){ myApps.style.display='none'; return; }
+  myApps.style.display='block';
+  whoami.textContent = session.user.email;
+  const { data, error } = await sb.from('applications').select('*').eq('email', session.user.email).order('created_at', {ascending:false});
+  if(error){ myAppsBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`; return; }
+  myAppsBody.innerHTML='';
+  (data||[]).forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${new Date(r.created_at).toLocaleString()}</td><td>${r.location||''}</td><td>${r.hours||''}</td><td><span class="badge">${r.status||''}</span></td>`;
+    myAppsBody.appendChild(tr);
+  });
+}
+
+const { data: { session } } = await sb.auth.getSession();
+await renderMyApps(session);
+sb.auth.onAuthStateChange((_evt, session)=> renderMyApps(session));
+if(logoutBtn){ logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); await renderMyApps(null);}}
 
 document.getElementById('year').textContent=new Date().getFullYear();
 </script>

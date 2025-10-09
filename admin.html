@@ -9,7 +9,7 @@
     header{display:flex;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
     header img{height:44px}
     .container{max-width:1200px;margin:24px auto;padding:0 16px}
-    .card{background:#0b1020;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:18px}
+    .card{background:#0b1020;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:18px;margin-bottom:16px}
     input,select,button{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
     button{cursor:pointer}
     .primary{background:linear-gradient(90deg,#60a5fa,#22d3ee);color:#081020;border:none;font-weight:700}
@@ -49,16 +49,25 @@
     </div>
     <div style="display:flex;gap:10px;margin:10px 0">
       <label for="locFilter" style="min-width:120px;opacity:.85">Filter by location</label>
-      <select id="locFilter">
-        <option value="">All Locations</option>
-        <option>Hillcrest</option><option>Semmes</option><option>Airport Blvd</option>
-        <option>Daphne</option><option>Saraland</option><option>Diberville</option><option>Moss Point</option>
-      </select>
+      <select id="locFilter"></select>
     </div>
 
     <table>
       <thead><tr><th>Submitted</th><th>Name</th><th>Email</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody id="appBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Manage Stores</h2>
+    <form id="addStoreForm" style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="storeName" placeholder="New store name" required/>
+      <input id="storeOrder" type="number" placeholder="Display order (optional)"/>
+      <button class="primary" type="submit">Add Store</button>
+    </form>
+    <table>
+      <thead><tr><th>Order</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="storesBody"></tbody>
     </table>
   </div>
 </div>
@@ -100,6 +109,12 @@ const statusSelect=document.getElementById('statusSelect');
 const saveStatus=document.getElementById('saveStatus');
 const cancelEdit=document.getElementById('cancelEdit');
 
+// Stores
+const addStoreForm=document.getElementById('addStoreForm');
+const storeName=document.getElementById('storeName');
+const storeOrder=document.getElementById('storeOrder');
+const storesBody=document.getElementById('storesBody');
+
 let currentRow=null;
 
 function show(el){ el.classList.remove('hidden'); }
@@ -112,13 +127,43 @@ loginBtn.onclick = async () => {
   const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
   if(error){ loginMsg.textContent = error.message; return; }
   hide(loginView); show(adminView);
-  await loadTable();
+  await Promise.all([loadStores(), loadTable()]);
 };
 
 logoutBtn.onclick = async () => {
   await sb.auth.signOut();
   hide(adminView); show(loginView);
 };
+
+async function loadStores(){
+  // Populate filter + table
+  const { data, error } = await sb.from('stores').select('*').order('display_order',{ascending:true}).order('name',{ascending:true});
+  if(error){ alert(error.message); return; }
+  // filter options
+  locFilter.innerHTML = '<option value="">All Locations</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
+  // table
+  storesBody.innerHTML='';
+  (data||[]).forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${s.display_order ?? ''}</td><td>${s.name}</td><td>${s.is_active?'Active':'Hidden'}</td>
+    <td style="display:flex;gap:8px">
+      <button class="toggleBtn">${s.is_active?'Hide':'Activate'}</button>
+      <button class="delStore danger">Delete</button>
+    </td>`;
+    tr.querySelector('.toggleBtn').onclick = async ()=>{
+      const { error } = await sb.from('stores').update({ is_active: !s.is_active }).eq('id', s.id);
+      if(error){ alert(error.message); return; }
+      await loadStores();
+    };
+    tr.querySelector('.delStore').onclick = async ()=>{
+      if(!confirm('Delete this store? Existing applications keep their location text.')) return;
+      const { error } = await sb.from('stores').delete().eq('id', s.id);
+      if(error){ alert(error.message); return; }
+      await loadStores();
+    };
+    storesBody.appendChild(tr);
+  });
+}
 
 async function loadTable(filterLoc=''){
   let q = sb.from('applications').select('*').order('created_at', { ascending:false });
@@ -166,6 +211,17 @@ saveStatus.onclick = async () => {
   closeModal();
   await loadTable(locFilter?.value||'');
 };
+
+addStoreForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = storeName.value.trim();
+  const order = storeOrder.value ? parseInt(storeOrder.value,10): null;
+  if(!name) return;
+  const { error } = await sb.from('stores').insert({ name, display_order: order, is_active: true });
+  if(error){ alert(error.message); return; }
+  storeName.value=''; storeOrder.value='';
+  await loadStores();
+});
 
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 </script>
