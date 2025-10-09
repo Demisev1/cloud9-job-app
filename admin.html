@@ -27,13 +27,14 @@ input,select,textarea{padding:10px;border-radius:10px;border:1px solid var(--lin
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 a.link{color:#93c5fd;text-decoration:none}
 a.link:hover{text-decoration:underline}
-/* Modal */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
 .modal .box{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;max-width:520px;width:92%}
 .modal h3{margin:0 0 10px 0}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row > *{flex:1}
 .note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
+.center{min-height:60vh;display:grid;place-items:center}
+label{font-size:13px;color:#cbd5e1}
 </style>
 </head>
 <body>
@@ -42,11 +43,23 @@ a.link:hover{text-decoration:underline}
   <nav>
     <a class="btn" href="index.html">Home</a>
     <a class="btn" href="apply.html">Apply</a>
+    <button id="logoutBtn" class="btn">Logout</button>
   </nav>
 </header>
 
 <div class="container">
-  <div class="card">
+  <div id="signinView" class="card center">
+    <div style="max-width:420px;width:100%">
+      <h2 style="margin:0 0 10px 0">Admin Sign In</h2>
+      <p style="color:#a6adbb;margin-top:0">Enter your email to receive a one-time sign-in link.</p>
+      <label for="adminEmail">Email</label>
+      <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin:6px 0 10px 0"/>
+      <button id="sendLinkBtn" class="btn primary" style="width:100%">Send sign-in link</button>
+      <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
+    </div>
+  </div>
+
+  <div id="adminView" class="card" style="display:none">
     <div class="controls">
       <select id="filterLocation"><option value="">All locations</option></select>
       <select id="filterStatus">
@@ -81,7 +94,6 @@ a.link:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- Edit modal -->
 <div class="modal" id="editModal">
   <div class="box">
     <h3>Edit Application</h3>
@@ -107,7 +119,6 @@ a.link:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- About modal (full text) -->
 <div class="modal" id="aboutModal">
   <div class="box">
     <h3>About Applicant</h3>
@@ -123,6 +134,43 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON } from "./js/config.js";
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Allowed admin emails
+const ALLOW = ["shane1661@gmail.com"];
+
+const signinView = document.getElementById("signinView");
+const adminView  = document.getElementById("adminView");
+const adminEmail = document.getElementById("adminEmail");
+const sendLinkBtn = document.getElementById("sendLinkBtn");
+const signinMsg = document.getElementById("signinMsg");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function showSignin(){ signinView.style.display='grid'; adminView.style.display='none'; }
+function showAdmin(){ signinView.style.display='none'; adminView.style.display='block'; }
+
+sendLinkBtn.onclick = async () => {
+  const email = (adminEmail.value||'').trim().toLowerCase();
+  if(!email) { signinMsg.textContent = "Enter your email."; return; }
+  if(!ALLOW.includes(email)) { signinMsg.textContent = "You are not authorized for admin."; return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
+  signinMsg.textContent = error ? ("Error: " + error.message) : "Check your email for a sign-in link.";
+};
+
+async function gate(){
+  const { data: { user } } = await sb.auth.getUser();
+  if(!user || !user.email || !ALLOW.includes(user.email.toLowerCase())){
+    showSignin();
+    return null;
+  }
+  showAdmin();
+  return user;
+}
+
+logoutBtn.onclick = async ()=>{
+  await sb.auth.signOut();
+  showSignin();
+};
+
+// ADMIN TABLE (same as v16)
 const tbody = document.querySelector("#appsTable tbody");
 const filterLocation = document.getElementById("filterLocation");
 const filterStatus = document.getElementById("filterStatus");
@@ -158,7 +206,6 @@ newStoreBtn.onclick = async ()=>{
 };
 
 async function loadFilters(){
-  // Load locations
   const { data:stores } = await sb.from("stores").select("name").eq("is_active", true).order("display_order", {ascending:true});
   const current = filterLocation.value;
   filterLocation.innerHTML = '<option value="">All locations</option>' + (stores||[]).map(s=>`<option>${s.name}</option>`).join('');
@@ -179,6 +226,8 @@ function matchesSearch(r, q){
 }
 
 async function loadData(){
+  const user = await gate();
+  if(!user) return;
   let query = sb.from("applications").select("*").order("created_at", {ascending:false}).limit(500);
   if(filterLocation.value){ query = query.eq("location", filterLocation.value); }
   if(filterStatus.value){ query = query.eq("status", filterStatus.value); }
@@ -216,7 +265,6 @@ function render(){
     tbody.appendChild(tr);
   });
 
-  // Wire buttons
   tbody.querySelectorAll("[data-edit]").forEach(b=>{
     b.addEventListener("click", ()=>{
       const id = b.getAttribute("data-edit");
@@ -261,13 +309,9 @@ saveBtn.onclick = async ()=>{
 filterLocation.onchange = loadData;
 filterStatus.onchange = loadData;
 search.oninput = ()=> { render(); };
+refreshBtn.onclick = async ()=>{ await loadFilters(); await loadData(); };
 
-refreshBtn.onclick = async ()=>{
-  await loadFilters();
-  await loadData();
-};
-
-// initial load
+await gate();
 await loadFilters();
 await loadData();
 </script>
