@@ -60,7 +60,7 @@ label{font-size:13px;color:#cbd5e1}
       <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
       <div style="display:flex;gap:8px">
         <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
-        <button id="signupBtn" class="btn" style="flex:1">Create admin</button>
+        
       </div>
       <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
       <p class="small">Tip: If you forget your password, use Supabase Auth reset or have me re-enable magic links.</p>
@@ -81,7 +81,29 @@ label{font-size:13px;color:#cbd5e1}
       <input id="search" placeholder="Search name / email / phone"/>
       <button id="refreshBtn" class="btn">Refresh</button>
       <button id="newStoreBtn" class="btn">Add Store</button>
+    
+    <!-- Stores Management -->
+    <div class="toolbar" style="margin-top:12px; align-items:flex-start; gap:12px; flex-wrap:wrap">
+      <div style="flex:1; min-width:280px">
+        <div style="font-weight:700; margin-bottom:6px">Stores</div>
+        <table class="table" id="storesTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Order</th>
+              <th>Active</th>
+              <th style="width:140px">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <button id="newStoreBtn" class="btn">Add Store</button>
+        <button id="refreshStoresBtn" class="btn">Refresh Stores</button>
+      </div>
     </div>
+
 
     <table class="table" id="appsTable">
       <thead>
@@ -154,7 +176,6 @@ const adminView  = document.getElementById("adminView");
 const adminEmail = document.getElementById("adminEmail");
 const adminPass  = document.getElementById("adminPass");
 const signinBtn  = document.getElementById("signinBtn");
-const signupBtn  = document.getElementById("signupBtn");
 const signinMsg  = document.getElementById("signinMsg");
 const logoutBtn  = document.getElementById("logoutBtn");
 
@@ -178,17 +199,7 @@ signinBtn.onclick = async () => {
   if(!ALLOW.includes(email)) { signinMsg.textContent = "You are not authorized for admin."; return; }
   const { error } = await sb.auth.signInWithPassword({ email, password });
   signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
-  if(!error){ await loadFilters(); await loadData(); }
-};
-
-// Optional: allow creating the admin account (only if email is allow-listed)
-signupBtn.onclick = async () => {
-  const email = (adminEmail.value||'').trim().toLowerCase();
-  const password = adminPass.value||'';
-  if(!email || !password) { signinMsg.textContent = "Enter email and password."; return; }
-  if(!ALLOW.includes(email)) { signinMsg.textContent = "Not allowed to create admin for this email."; return; }
-  const { error } = await sb.auth.signUp({ email, password });
-  signinMsg.textContent = error ? ("Error: " + error.message) : "Admin account created. Now click Sign in.";
+  if(!error){ await loadFilters(); await loadStores(); await loadData(); }
 };
 
 logoutBtn.onclick = async ()=>{
@@ -203,6 +214,8 @@ const filterStatus = document.getElementById("filterStatus");
 const search = document.getElementById("search");
 const refreshBtn = document.getElementById("refreshBtn");
 const newStoreBtn = document.getElementById("newStoreBtn");
+const refreshStoresBtn = document.getElementById("refreshStoresBtn");
+const storesTbody = document.querySelector("#storesTable tbody");
 
 const editModal = document.getElementById("editModal");
 const statusSelect = document.getElementById("statusSelect");
@@ -223,7 +236,45 @@ function closeModal(m){ m.style.display='none'; document.body.style.overflow='au
 cancelBtn.onclick = ()=> closeModal(editModal);
 aboutCloseBtn.onclick = ()=> closeModal(aboutModal);
 
+
+async function loadStores(){
+  const { data, error } = await sb.from("stores").select("id,name,display_order,is_active").order("display_order", {ascending:true});
+  if(error){ console.error(error); return; }
+  storesTbody.innerHTML = "";
+  (data||[]).forEach(row=>{
+    const tr = document.createElement("tr");
+    const active = !!row.is_active;
+    tr.innerHTML = `
+      <td>${sanitize(row.name||"")}</td>
+      <td>${row.display_order ?? ""}</td>
+      <td><span class="badge ${active?'success':'warn'}">${active?'Yes':'No'}</span></td>
+      <td>
+        <button class="btn" data-act="toggle" data-id="${row.id}">${active?'Deactivate':'Activate'}</button>
+        <button class="btn danger" data-act="delete" data-id="${row.id}">Delete</button>
+      </td>
+    `;
+    storesTbody.appendChild(tr);
+  });
+}
+storesTbody.onclick = async (e)=>{
+  const btn = e.target.closest("button"); if(!btn) return;
+  const id = btn.getAttribute("data-id"); const act = btn.getAttribute("data-act");
+  if(act==="delete"){
+    if(!confirm("Delete this store? This cannot be undone.")) return;
+    const { error } = await sb.from("stores").delete().eq("id", id);
+    if(error) alert(error.message); else { await loadStores(); await loadFilters(); await loadData(); }
+  } else if (act==="toggle"){
+    // Fetch current, then flip is_active
+    const { data, error } = await sb.from("stores").select("is_active").eq("id", id).single();
+    if(error){ alert(error.message); return; }
+    const { error: upErr } = await sb.from("stores").update({ is_active: !data.is_active }).eq("id", id);
+    if(upErr) alert(upErr.message); else { await loadStores(); await loadFilters(); await loadData(); }
+  }
+};
+refreshStoresBtn.onclick = ()=> loadStores();
+
 newStoreBtn.onclick = async ()=>{
+
   const name = prompt("Store name");
   if(!name) return;
   const display_order = Number(prompt("Display order (number, optional)", "1")||"1");
