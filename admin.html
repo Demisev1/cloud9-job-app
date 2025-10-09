@@ -53,7 +53,11 @@
     </div>
 
     <table>
-      <thead><tr><th>Submitted</th><th>Name</th><th>Email</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Submitted</th><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Hours</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
       <tbody id="appBody"></tbody>
     </table>
   </div>
@@ -136,12 +140,9 @@ logoutBtn.onclick = async () => {
 };
 
 async function loadStores(){
-  // Populate filter + table
   const { data, error } = await sb.from('stores').select('*').order('display_order',{ascending:true}).order('name',{ascending:true});
   if(error){ alert(error.message); return; }
-  // filter options
   locFilter.innerHTML = '<option value="">All Locations</option>' + (data||[]).map(s=>`<option>${s.name}</option>`).join('');
-  // table
   storesBody.innerHTML='';
   (data||[]).forEach(s=>{
     const tr=document.createElement('tr');
@@ -182,6 +183,7 @@ function renderTable(rows){
       <td>${dateStr}</td>
       <td>${a.first_name||''} ${a.last_name||''}</td>
       <td>${a.email||''}</td>
+      <td>${a.phone||''}</td>
       <td>${a.location||''}</td>
       <td>${a.hours||''}</td>
       <td><span class='badge'>${a.status||''}</span></td>
