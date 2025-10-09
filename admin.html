@@ -195,7 +195,7 @@ label{font-size:13px;color:#cbd5e1}
       <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
       <div style="display:flex;gap:8px">
         <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
-        <button id="signupBtn" class="btn" style="flex:1">Create admin</button>
+        
       </div>
       <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
       <p class="small">Tip: If you forget your password, use Supabase Auth reset or have me re-enable magic links.</p>
@@ -572,6 +572,87 @@ await loadData();
   }
 
   loadStores();
+})();
+</script>
+
+
+<script>
+(function(){
+  // Remove any lingering "Create admin" button by text
+  function nukeCreateAdmin() {
+    const candidates = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"], .btn'));
+    for (const el of candidates) {
+      const t = (el.textContent || el.value || '').trim().toLowerCase();
+      if (t === 'create admin' || t === 'create  admin' || t.includes('create admin')) {
+        el.remove();
+      }
+    }
+  }
+
+  function moveStoresCard() {
+    const card = document.getElementById('storesCard');
+    if (!card) return;
+    // Avoid sticking to nav/header; place into a main-ish container
+    const targets = ['main','#main','.main','#content','#container','.container','#app','#admin','.page','.wrapper'];
+    for (const sel of targets) {
+      const host = document.querySelector(sel);
+      if (host && host !== document.body && !host.closest('nav') && !host.closest('header')) {
+        host.appendChild(card);
+        return;
+      }
+    }
+    // fallback: place before closing body
+    document.body.appendChild(card);
+  }
+
+  function showDashboardUI(show) {
+    // stores card
+    const sc = document.getElementById('storesCard');
+    if (sc) sc.style.display = show ? '' : 'none';
+
+    // Try to hide an auth card by headline
+    const cards = Array.from(document.querySelectorAll('.card, section, form, div'));
+    for (const c of cards) {
+      const txt = (c.innerText || '').toLowerCase();
+      if (txt.includes('admin sign in') && (c.querySelector('input[type="password"]') || c.querySelector('input[type="email"]'))) {
+        c.style.display = show ? 'none' : '';
+      }
+    }
+  }
+
+  async function checkAuthAndGate() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const loggedIn = !!session;
+      showDashboardUI(loggedIn);
+      if (loggedIn) {
+        // Load stores when authenticated
+        if (typeof window.loadStores === 'function') window.loadStores();
+      }
+    } catch (e) {
+      // If supabase not ready, leave auth card visible
+      console.warn('Auth check skipped', e);
+    }
+  }
+
+  function bindAuthListener() {
+    try {
+      supabase.auth.onAuthStateChange((_event, session) => {
+        const loggedIn = !!session;
+        showDashboardUI(loggedIn);
+        if (loggedIn && typeof window.loadStores === 'function') window.loadStores();
+      });
+    } catch (e) {
+      console.warn('No auth listener', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    nukeCreateAdmin();
+    moveStoresCard();
+    checkAuthAndGate();
+    bindAuthListener();
+  });
 })();
 </script>
 
