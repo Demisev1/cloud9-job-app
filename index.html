@@ -5,17 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Cloud 9 Vapes — Careers</title>
 <style>
-:root{--bg:#0b0f1a;--card:#0b1020;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial}
-header{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,26,.8);backdrop-filter: blur(6px);}
-header img{height:44px;width:44px;border-radius:10px;background:#fff}
-h1{margin:0;font-size:20px}
+:root{--bg:#0b0f1a;--card:#0c1220;--muted:#9ca3af;--text:#e5e7eb;--line:#1f2937;--accent:#60a5fa;--accent2:#22d3ee;--radius:16px}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,26,.85);backdrop-filter: blur(6px);}
+header img{height:38px;width:auto}
+h1{margin:0;font-size:18px}
 nav{margin-left:auto;display:flex;gap:10px}
 .navbtn{color:var(--text);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:12px}
 .navbtn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
 .container{max-width:1100px;margin:28px auto;padding:0 16px}
-.card{background:radial-gradient(1200px 400px at 20% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.card{background:radial-gradient(800px 320px at 20% -10%,rgba(34,211,238,.08),transparent),var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .section-title{font-size:22px;margin:0 0 10px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 input,select,textarea,button{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:var(--text)}
@@ -23,8 +22,8 @@ textarea{min-height:120px}
 button{cursor:pointer}
 button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#081020;border:none;font-weight:800}
 .small{color:var(--muted);font-size:12px}
-.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
 footer{color:#6b7280;text-align:center;margin:34px 0}
+.success{border-left:3px solid #22d3ee;padding-left:10px}
 </style>
 </head>
 <body>
@@ -99,7 +98,7 @@ if(applyForm){
   const {data,error}=await sb.rpc("create_application",payload);
   if(error){applyMsg.textContent="Error: "+error.message;return;}
   const code=data?.[0]?.tracking_code||"";
-  applyMsg.innerHTML=`Thanks! Your tracking code is <strong>${code}</strong>. Keep it safe.`;
+  applyMsg.innerHTML=`<span class='success'>Thanks! Your tracking code is <strong>${code}</strong>. Keep it safe.</span>`;
   applyForm.reset();
  });}
 
