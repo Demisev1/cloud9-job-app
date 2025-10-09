@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Application Received — Cloud 9 Vapes</title>
+<link rel="icon" href="assets/logo.png"/>
+<style>
+:root{--bg:#0b0f1a;--panel:#0b1020;--ink:#e5e7eb;--muted:#a6adbb;--line:#1f2937;--brand1:#60a5fa;--brand2:#22d3ee;--radius:18px}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1600px 700px at 20% -10%,rgba(34,211,238,.10),transparent),var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;min-height:100dvh;display:flex;flex-direction:column}
+header{height:64px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #111827;background:rgba(10,14,24,.78);backdrop-filter:saturate(140%) blur(6px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.brand img{height:36px;width:auto;border-radius:10px}
+nav{margin-left:auto;display:flex;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:14px;border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.btn.primary{background:linear-gradient(90deg,var(--brand1),var(--brand2));color:#051126;border:none;font-weight:800}
+main{flex:1;display:grid;place-items:center;padding:24px}
+.card{max-width:720px;width:100%;text-align:center;background:radial-gradient(900px 360px at 15% -10%,rgba(34,211,238,.08),transparent),var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:28px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+h1{font-size:32px;margin:10px 0 8px 0}
+p.lead{color:#cbd5e1;font-size:15px;margin:0 0 18px 0}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.badge{display:inline-block;margin-top:6px;padding:6px 10px;border-radius:999px;background:#0c1629;border:1px solid #1f2a3d;color:#a2b7d6;font-size:12px}
+.small{color:#93a1b5;font-size:12px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/><span>Cloud 9 Vapes — Careers</span></div>
+  <nav>
+    <a class="btn" href="index.html">Home</a>
+    <a class="btn" href="apply.html">Apply</a>
+    <a class="btn" href="check.html">Check Status</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <img src="assets/logo.png" alt="" style="height:70px;opacity:.95"/>
+    <h1>Thank you — we’ve received your application!</h1>
+    <p class="lead">Our team will review it soon. If we’re moving forward, we’ll reach out to you by email or phone.</p>
+    <div id="where" class="badge" style="display:none"></div>
+    <div class="actions">
+      <a class="btn primary" href="check.html" id="checkBtn">Check My Status</a>
+      <a class="btn" href="index.html">Return Home</a>
+    </div>
+    <div class="small" id="emailMsg"></div>
+  </div>
+</main>
+
+<script>
+// If apply.html redirects with ?email=... we show it back here for reassurance
+const params = new URLSearchParams(location.search);
+const email = params.get('email');
+if(email){
+  document.getElementById('emailMsg').textContent = 'Submitted for: ' + email;
+}
+const loc = params.get('location');
+if(loc){
+  const w = document.getElementById('where');
+  w.style.display='inline-block';
+  w.textContent = 'Preferred location: ' + loc;
+}
+</script>
+</body>
+</html>

@@ -191,6 +191,10 @@ document.getElementById('lookupBtn').onclick = async ()=>{
 };
 
 document.getElementById('year').textContent=new Date().getFullYear();
+
+// Fallback: if we dispatch window.APP_SUBMITTED(email, location), redirect to thank you
+window.APP_SUBMITTED = (e,l)=>{ try{ window.location.href = `thankyou.html?email=${encodeURIComponent(e||'')}&location=${encodeURIComponent(l||'')}` }catch(_){} };
+
 </script>
 </body>
 </html>
