@@ -427,6 +427,26 @@ await gate(); await init();
 function ____showAuth(){ document.body.classList.add('locked'); const m=document.getElementById('authModal'); if(m) m.style.display='flex'; }
 function ____hideAuth(){ document.body.classList.remove('locked'); const m=document.getElementById('authModal'); if(m) m.style.display='none'; }
 
+
+// Defensive: ensure auth modal exists and is visible when locked
+(function(){
+  function ensureAuthModal(){
+    var m = document.getElementById('authModal');
+    if(!m){
+      var d=document.createElement('div');
+      d.innerHTML = ` <!-- Hard-safe Auth Modal --> <div id="authModal" style="position:fixed;inset:0;background:rgba(0,0,0,.80);display:flex;align-items:center;justify-content:center;z-index:10000">   <div class="card" style="max-width:460px;width:92%">     <h3>Admin Sign In</h3>     <p class="small">Use your admin email & password.</p>     <label>Email</label>     <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin-bottom:8px"/>     <label>Password</label>     <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>     <div style="display:flex;gap:8px">       <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>       <button id="signupBtn" class="btn" style="flex:1">Create admin</button>     </div>     <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>   </div> </div> `.trim();
+      document.body.appendChild(d.firstElementChild);
+    }else{
+      m.style.display = 'flex';
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureAuthModal);
+  } else {
+    ensureAuthModal();
+  }
+})();
+
 </script>
 </div>
 </body>
