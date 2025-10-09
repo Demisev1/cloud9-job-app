@@ -1,0 +1,2 @@
+export const SUPABASE_URL="https://ynlishvnqanrucifqppe.supabase.co";
+export const SUPABASE_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlubGlzaHZucWFucnVjaWZxcHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NTExNjcsImV4cCI6MjA3NTUyNzE2N30.g_axD_jOzxtoAbYlbe2RCRplCNjrxCe-MmPvu74D3v0";
