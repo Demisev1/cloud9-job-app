@@ -6,112 +6,137 @@
 <title>Cloud 9 Vapes — Admin</title>
 <link rel="icon" href="assets/logo.png"/>
 <style>
-:root{
-  --bg:#0b0f1a;--panel:#0b1020;--ink:#e5e7eb;--muted:#a6adbb;--line:#1f2937;
-  --brand1:#60a5fa;--brand2:#22d3ee;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;
-  --radius:18px
-}
+:root{--bg:#0b0f1a;--panel:#0b1020;--ink:#e5e7eb;--muted:#a6adbb;--line:#1f2937;--brand1:#60a5fa;--brand2:#22d3ee;--radius:18px}
 *{box-sizing:border-box}
-html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-header{position:sticky;top:0;height:64px;display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(11,16,32,.78);backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--line);z-index:10}
+header{position:sticky;top:0;height:64px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #111827;background:rgba(10,14,24,.78);backdrop-filter:saturate(140%) blur(6px);z-index:10}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700}
 .brand img{height:36px;width:auto;border-radius:10px}
 nav{margin-left:auto;display:flex;gap:10px}
-.btn{display:inline-flex;align-items:center;justify-content:center;height:38px;padding:0 14px;border:1px solid #243047;border-radius:10px;color:var(--ink);cursor:pointer;background:transparent;transition:.15s}
-.btn:hover{border-color:#2b3a55;transform:translateY(-1px)}
-.btn.primary{background:linear-gradient(90deg,var(--brand1),var(--brand2));border-color:transparent;color:#081021;font-weight:700}
-.container{max-width:1200px;margin:0 auto;padding:18px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.grid{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center}
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-input,select{height:38px;background:#0e1528;border:1px solid #25314a;border-radius:10px;color:var(--ink);padding:0 10px}
-input::placeholder{color:#8290a8}
-table{width:100%;border-collapse:collapse}
-th,td{padding:12px;border-bottom:1px solid #1c2536}
-th{font-size:12px;text-transform:uppercase;color:#9fb0cc;letter-spacing:.06em;text-align:left}
-tr:hover td{background:#0e1528}
-.badge{font-size:12px;border-radius:999px;padding:4px 10px;display:inline-block;border:1px solid #2a3a55}
-.badge.ok{border-color:var(--good);color:var(--good)}
-.badge.warn{border-color:var(--warn);color:var(--warn)}
-.badge.bad{border-color:var(--bad);color:var(--bad)}
-.empty{opacity:.8;text-align:center;padding:40px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;border:1px solid var(--line);text-decoration:none;color:var(--ink);cursor:pointer;background:transparent}
+.btn.primary{background:linear-gradient(90deg,var(--brand1),var(--brand2));color:#051126;border:none;font-weight:800}
+.container{max-width:1200px;margin:24px auto;padding:0 16px}
+.card{background:radial-gradient(900px 360px at 15% -10%,rgba(34,211,238,.08),transparent),var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+input,select,textarea{padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a1222;color:#e5e7eb}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid #162034;text-align:left;vertical-align:top}
+.table th{color:#a5f3fc}
+.badge{padding:4px 8px;border-radius:8px;background:#1f2937}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;color:#cbd5e1;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+a.link{color:#93c5fd;text-decoration:none}
+a.link:hover{text-decoration:underline}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
-.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:520px;width:min(520px,94vw)}
-.small{color:var(--muted);font-size:14px}
-.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+.modal .box{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;max-width:520px;width:92%}
+.modal h3{margin:0 0 10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > *{flex:1}
+.note{font-size:13px;color:#c7d2fe;background:#0b1028;border:1px solid #24304a;border-radius:10px;padding:10px;margin-top:6px}
+.center{min-height:60vh;display:grid;place-items:center}
+label{font-size:13px;color:#cbd5e1}
+.small{color:#9ca3af;font-size:12px}
 </style>
 </head>
-<body class="locked">
+<body>
 <header>
-  <div class="brand">
-    <img src="assets/logo.png" alt="Cloud 9"/>
-    <div>Cloud 9 Vapes — Admin</div>
-  </div>
+  <div class="brand"><img src="assets/logo.png" alt="Cloud 9 Vapes Logo"/><span>Cloud 9 Vapes — Admin</span></div>
   <nav>
-    <button id="refreshBtn" class="btn">Refresh</button>
-    <button id="logoutBtn" class="btn">Log out</button>
+    <a class="btn" href="index.html">Home</a>
+    <a class="btn" href="apply.html">Apply</a>
+    <button id="logoutBtn" class="btn">Logout</button>
   </nav>
 </header>
 
-<div class="container" id="appShell" style="display:none">
-  <div class="panel" style="margin-bottom:14px">
-    <div class="grid">
-      <div class="controls">
-        <input id="search" type="search" placeholder="Search name, email, phone">
-        <select id="filterLocation"><option value="">All locations</option></select>
-        <select id="filterStatus">
-          <option value="">All status</option>
-          <option>new</option>
-          <option>in-review</option>
-          <option>interview</option>
-          <option>hired</option>
-          <option>rejected</option>
-        </select>
+<div class="container">
+  <!-- Sign-in card (email + password) -->
+  <div id="signinView" class="card center">
+    <div style="max-width:420px;width:100%">
+      <h2 style="margin:0 0 10px 0">Admin Sign In</h2>
+      <p class="small" style="margin-top:0">Use your admin email & password.</p>
+      <label for="adminEmail">Email</label>
+      <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin-bottom:8px"/>
+      <label for="adminPass">Password</label>
+      <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
+      <div style="display:flex;gap:8px">
+        <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
+        <button id="signupBtn" class="btn" style="flex:1">Create admin</button>
       </div>
-      <div></div>
-      <div class="small" id="userBadge">Signed out</div>
+      <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
+      <p class="small">Tip: If you forget your password, use Supabase Auth reset or have me re-enable magic links.</p>
     </div>
   </div>
 
-  <div class="panel" id="storePanel" style="margin-bottom:14px">
-  <h3 style="margin:0 0 12px 0">Store Manager</h3>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <input id="storeName" placeholder="Store name (e.g., Daphne)" />
-    <input id="storeDetails" placeholder="Details (optional: address, phone)" style="min-width:320px" />
-    <button id="addStoreBtn" class="btn primary">Add store</button>
-  </div>
-  <table id="storesTable" style="width:100%">
-    <thead><tr><th style="text-align:left">Store</th><th style="text-align:left">Details</th><th>Action</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
-<div class="panel">
-    <table id="appsTable">
+  <!-- Dashboard -->
+  <div id="adminView" class="card" style="display:none">
+    <div class="controls">
+      <select id="filterLocation"><option value="">All locations</option></select>
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="pending_review">Pending review</option>
+        <option value="interview">Interview</option>
+        <option value="hired">Hired</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <input id="search" placeholder="Search name / email / phone"/>
+      <button id="refreshBtn" class="btn">Refresh</button>
+      <button id="newStoreBtn" class="btn">Add Store</button>
+    </div>
+
+    <table class="table" id="appsTable">
       <thead>
         <tr>
-          <th>When</th><th>Name</th><th>Contact</th><th>Location</th><th>Status</th><th>Note</th><th>Action</th>
+          <th>Applied</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Location</th>
+          <th>Hours</th>
+          <th>Start</th>
+          <th>Status</th>
+          <th>About</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-    <div class="empty" id="emptyMsg" style="display:none">No applications found.</div>
   </div>
 </div>
 
-<!-- Sign-in overlay -->
-<div class="modal" id="authModal" style="display:flex">
+<!-- Edit modal -->
+<div class="modal" id="editModal">
   <div class="box">
-    <h3>Admin Sign In</h3>
-    <p class="small">Use your admin email &amp; password.</p>
-    <label>Email</label>
-    <input id="adminEmail" type="email" placeholder="you@company.com" style="width:100%;margin-bottom:8px"/>
-    <label>Password</label>
-    <input id="adminPass" type="password" placeholder="••••••••" style="width:100%;margin-bottom:12px"/>
-    <div style="display:flex;gap:8px">
-      <button id="signinBtn" class="btn primary" style="flex:1">Sign in</button>
+    <h3>Edit Application</h3>
+    <div class="row">
+      <div>
+        <label>Status</label><br/>
+        <select id="statusSelect">
+          <option value="pending_review">Pending review</option>
+          <option value="interview">Interview</option>
+          <option value="hired">Hired</option>
+          <option value="rejected">Rejected</option>
+        </select>
       </div>
-    <p id="signinMsg" class="mono" style="margin-top:10px;opacity:.9"></p>
+      <div>
+        <label>Public note (visible to applicant)</label><br/>
+        <textarea id="noteInput" placeholder="Optional note..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn primary" id="saveBtn">Save</button>
+      <button class="btn" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- About modal -->
+<div class="modal" id="aboutModal">
+  <div class="box">
+    <h3>About Applicant</h3>
+    <div id="aboutContent" class="note"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" id="aboutCloseBtn">Close</button>
+    </div>
   </div>
 </div>
 
@@ -120,207 +145,201 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON } from "./js/config.js";
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// If you want to restrict to specific admin emails, put them here.
-// Set to null (default) to allow ANY signed-in user.
-const ALLOW = null; // e.g., ["you@company.com", "manager@cloud9vapes.com"]
+// Allowed admin emails (keep simple allowlist)
+const ALLOW = ["shane1661@gmail.com"];
 
-// --- Elements ---
-const authModal = document.getElementById("authModal");
+// UI
+const signinView = document.getElementById("signinView");
+const adminView  = document.getElementById("adminView");
 const adminEmail = document.getElementById("adminEmail");
 const adminPass  = document.getElementById("adminPass");
 const signinBtn  = document.getElementById("signinBtn");
+const signupBtn  = document.getElementById("signupBtn");
 const signinMsg  = document.getElementById("signinMsg");
 const logoutBtn  = document.getElementById("logoutBtn");
 
-const appShell = document.getElementById("appShell");
+function showSignin(){ signinView.style.display='grid'; adminView.style.display='none'; }
+function showAdmin(){ signinView.style.display='none'; adminView.style.display='block'; }
+
+async function gate(){
+  const { data: { user } } = await sb.auth.getUser();
+  if(!user || !user.email || !ALLOW.includes(user.email.toLowerCase())){
+    showSignin();
+    return null;
+  }
+  showAdmin();
+  return user;
+}
+
+signinBtn.onclick = async () => {
+  const email = (adminEmail.value||'').trim().toLowerCase();
+  const password = adminPass.value||'';
+  if(!email || !password) { signinMsg.textContent = "Enter email and password."; return; }
+  if(!ALLOW.includes(email)) { signinMsg.textContent = "You are not authorized for admin."; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
+  if(!error){ await loadFilters(); await loadData(); }
+};
+
+// Optional: allow creating the admin account (only if email is allow-listed)
+signupBtn.onclick = async () => {
+  const email = (adminEmail.value||'').trim().toLowerCase();
+  const password = adminPass.value||'';
+  if(!email || !password) { signinMsg.textContent = "Enter email and password."; return; }
+  if(!ALLOW.includes(email)) { signinMsg.textContent = "Not allowed to create admin for this email."; return; }
+  const { error } = await sb.auth.signUp({ email, password });
+  signinMsg.textContent = error ? ("Error: " + error.message) : "Admin account created. Now click Sign in.";
+};
+
+logoutBtn.onclick = async ()=>{
+  await sb.auth.signOut();
+  showSignin();
+};
+
+// ----- Admin table logic (same as before) -----
 const tbody = document.querySelector("#appsTable tbody");
 const filterLocation = document.getElementById("filterLocation");
 const filterStatus = document.getElementById("filterStatus");
 const search = document.getElementById("search");
 const refreshBtn = document.getElementById("refreshBtn");
-const emptyMsg = document.getElementById("emptyMsg");
-const userBadge = document.getElementById("userBadge");
+const newStoreBtn = document.getElementById("newStoreBtn");
 
-function showAuth(){ authModal.style.display='flex'; document.body.classList.add("locked"); appShell.style.display='none'; }
-function hideAuth(){ authModal.style.display='none'; document.body.classList.remove("locked"); appShell.style.display='block'; }
+const editModal = document.getElementById("editModal");
+const statusSelect = document.getElementById("statusSelect");
+const noteInput = document.getElementById("noteInput");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
 
-function allowed(email){
-  if(!email) return false;
-  if(Array.isArray(ALLOW)) return ALLOW.map(s=>s.toLowerCase()).includes(email.toLowerCase());
-  return true; // no allowlist => any authenticated user is ok
+const aboutModal = document.getElementById("aboutModal");
+const aboutContent = document.getElementById("aboutContent");
+const aboutCloseBtn = document.getElementById("aboutCloseBtn");
+
+let rows = [];
+let editingId = null;
+
+function openModal(m){ m.style.display='flex'; document.body.style.overflow='hidden'; }
+function closeModal(m){ m.style.display='none'; document.body.style.overflow='auto'; }
+
+cancelBtn.onclick = ()=> closeModal(editModal);
+aboutCloseBtn.onclick = ()=> closeModal(aboutModal);
+
+newStoreBtn.onclick = async ()=>{
+  const name = prompt("Store name");
+  if(!name) return;
+  const display_order = Number(prompt("Display order (number, optional)", "1")||"1");
+  const { error } = await sb.from("stores").insert({ name, display_order, is_active: true });
+  if(error) alert(error.message); else { await loadFilters(); await loadData(); }
+};
+
+async function loadFilters(){
+  const { data:stores } = await sb.from("stores").select("name").eq("is_active", true).order("display_order", {ascending:true});
+  const current = filterLocation.value;
+  filterLocation.innerHTML = '<option value="">All locations</option>' + (stores||[]).map(s=>`<option>${s.name}</option>`).join('');
+  filterLocation.value = current || "";
 }
 
-// --- Auth flows ---
-signinBtn.onclick = async () => {
-  const email=(adminEmail.value||'').trim();
-  const password=adminPass.value||'';
-  if(!email||!password){ signinMsg.textContent="Enter email and password."; return; }
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  signinMsg.textContent = error ? ("Error: " + error.message) : "Signed in.";
-  if(!error) await gateAndInit();
-loadStores();
-};
-logoutBtn.onclick = async () => {
-  await sb.auth.signOut();
-  userBadge.textContent = "Signed out";
-  showAuth();
-};
-
-async function gate(){
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user || !allowed(user.email)){ showAuth(); return null; }
-  hideAuth(); userBadge.textContent = user.email; return user;
+function sanitize(text){
+  return (text||"").replace(/[<>&]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
 }
 
-async function gateAndInit(){
+function matchesSearch(r, q){
+  if(!q) return true;
+  q = q.toLowerCase();
+  return (r.first_name||'').toLowerCase().includes(q)
+      || (r.last_name||'').toLowerCase().includes(q)
+      || (r.email||'').toLowerCase().includes(q)
+      || (r.phone||'').toLowerCase().includes(q);
+}
+
+async function loadData(){
   const user = await gate();
-  if(user){ await loadAndRender(); }
+  if(!user) return;
+  let query = sb.from("applications").select("*").order("created_at", {ascending:false}).limit(500);
+  if(filterLocation.value){ query = query.eq("location", filterLocation.value); }
+  if(filterStatus.value){ query = query.eq("status", filterStatus.value); }
+  const { data, error } = await query;
+  if(error){ tbody.innerHTML = `<tr><td colspan="10">${error.message}</td></tr>`; return; }
+  rows = (data||[]).filter(r => matchesSearch(r, search.value));
+  render();
 }
 
-// --- Data load & render ---
-async function fetchApplications(){
-  // Adjust table/column names to your schema.
-  // Expected columns: created_at, full_name, email, phone, location, status, note
-  // If your table is named differently, change it here.
-  const { data, error } = await sb.from("applications").select("*").order("created_at", { ascending:false }).limit(200);
-  if(error){ console.error(error); return []; }
-  return data || [];
-}
-
-function rowMatchesFilters(row){
-  const q = (search.value||"").toLowerCase();
-  const loc = filterLocation.value||"";
-  const st = filterStatus.value||"";
-  const hay = [row.full_name, row.email, row.phone].map(x=> (x||"").toLowerCase()).join(" ");
-  if(q && !hay.includes(q)) return false;
-  if(loc && (row.location||"") !== loc) return false;
-  if(st && (row.status||"") !== st) return false;
-  return true;
-}
-
-function renderRows(rows){
+function render(){
   tbody.innerHTML = "";
-  let shown = 0;
-  for(const r of rows){
-    if(!rowMatchesFilters(r)) continue;
-    shown++;
+  rows.forEach(r => {
     const tr = document.createElement("tr");
-    const when = r.created_at ? new Date(r.created_at).toLocaleString() : "";
-    const status = (r.status||"new").toLowerCase();
-    const badgeClass = status==="hired" ? "ok" : status==="rejected" ? "bad" : (status==="interview"?"warn":"");
+    const applied = r.applied_on ? new Date(r.applied_on).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : "");
+    const start = r.start_date ? new Date(r.start_date).toLocaleDateString() : "—";
+    const aboutShort = sanitize((r.about||"").slice(0, 80)) + ((r.about||"").length>80 ? "…" : "");
     tr.innerHTML = `
-      <td class="mono">${when}</td>
-      <td>${r.full_name||r.name||""}</td>
+      <td class="mono">${applied}</td>
+      <td>${sanitize(r.first_name)} ${sanitize(r.last_name)}</td>
+      <td><a class="link" href="mailto:${sanitize(r.email)}">${sanitize(r.email)}</a></td>
+      <td>${sanitize(r.phone||"")}</td>
+      <td>${sanitize(r.location||"")}</td>
+      <td>${sanitize(r.hours||"")}</td>
+      <td class="mono">${start}</td>
+      <td><span class="badge">${sanitize(r.status||"")}</span></td>
       <td>
-        <div>${r.email||""}</div>
-        <div class="small mono">${r.phone||""}</div>
+        ${aboutShort ? aboutShort : "<span class='mono' style='opacity:.7'>—</span>"}
+        ${(r.about||"").length>0 ? ` <a href="#" class="link" data-about="${r.id}">View</a>` : ""}
       </td>
-      <td>${r.location||""}</td>
-      <td><span class="badge ${badgeClass}">${status}</span></td>
-      <td>${r.note||""}</td>
-      <td><button class="btn" data-del="${r.id??''}" title="Delete">Delete</button></td>
+      <td class="actions">
+        <button class="btn" data-edit="${r.id}">Edit</button>
+        <button class="btn" data-del="${r.id}">Delete</button>
+      </td>
     `;
     tbody.appendChild(tr);
-  }
-  emptyMsg.style.display = shown ? "none" : "block";
-}
+  });
 
-let cache = [];
-async function loadAndRender(){
-  cache = await fetchApplications();
-  renderRows(cache);
-  bindAppDeleteButtons();
-}
-
-
-// --- Stores ---
-const storesTbody = document.querySelector("#storesTable tbody");
-const storeName = document.getElementById("storeName");
-const storeDetails = document.getElementById("storeDetails");
-const addStoreBtn = document.getElementById("addStoreBtn");
-
-async function fetchStores(){
-  const { data, error } = await sb.from("stores").select("*").order("name", { ascending: true });
-  if(error){ console.error(error); return []; }
-  return data || [];
-}
-
-function populateLocationFilter(stores){
-  const sel = filterLocation;
-  const val = sel.value;
-  sel.innerHTML = '<option value="">All locations</option>' + stores.map(s => `<option>${s.name}</option>`).join("");
-  // restore previous selection if still present
-  const opt = [...sel.options].find(o => o.value === val);
-  if(opt) sel.value = val;
-}
-
-function renderStores(rows){
-  storesTbody.innerHTML = "";
-  for(const s of rows){
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${s.name||""}</td>
-      <td class="small">${s.details||""}</td>
-      <td><button class="btn" data-store-del="${s.id??''}">Delete</button></td>
-    `;
-    storesTbody.appendChild(tr);
-  }
-  // bind delete buttons
-  storesTbody.querySelectorAll("button[data-store-del]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-store-del");
-      if(!id){ alert("Missing store id"); return; }
-      if(!confirm("Delete this store?")) return;
-      const { error } = await sb.from("stores").delete().eq("id", id);
-      if(error){ alert("Delete failed: " + error.message); return; }
-      await loadStores();
-      // also refresh apps render so the filter remains consistent
-      renderRows(cache);
-  bindAppDeleteButtons();
+  tbody.querySelectorAll("[data-edit]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-edit");
+      const r = rows.find(x=>String(x.id)===String(id));
+      if(!r) return;
+      editingId = r.id;
+      statusSelect.value = r.status || "pending_review";
+      noteInput.value = r.notes || "";
+      openModal(editModal);
     });
   });
-}
 
-async function addStore(){
-  const name = (storeName.value||"").trim();
-  const details = (storeDetails.value||"").trim();
-  if(!name){ alert("Enter a store name"); return; }
-  const { error } = await sb.from("stores").insert({ name, details });
-  if(error){ alert("Add failed: " + error.message); return; }
-  storeName.value = ""; storeDetails.value = "";
-  await loadStores();
-}
-
-async function loadStores(){
-  const rows = await fetchStores();
-  renderStores(rows);
-  populateLocationFilter(rows);
-}
-
-addStoreBtn?.addEventListener("click", addStore);
-
-// --- Application delete buttons ---
-function bindAppDeleteButtons(){
-  tbody.querySelectorAll("button[data-del]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-del");
-      if(!id){ alert("Missing application id"); return; }
+  tbody.querySelectorAll("[data-del]").forEach(b=>{
+    b.addEventListener("click", async ()=>{
+      const id = b.getAttribute("data-del");
       if(!confirm("Delete this application?")) return;
       const { error } = await sb.from("applications").delete().eq("id", id);
-      if(error){ alert("Delete failed: " + error.message); return; }
-      await loadAndRender();
+      if(error) alert(error.message); else loadData();
+    });
+  });
+
+  tbody.querySelectorAll("[data-about]").forEach(a=>{
+    a.addEventListener("click", (e)=>{
+      e.preventDefault();
+      const id = a.getAttribute("data-about");
+      const r = rows.find(x=>String(x.id)===String(id));
+      aboutContent.innerHTML = sanitize(r?.about||"").replace(/\n/g,"<br/>");
+      openModal(aboutModal);
     });
   });
 }
 
-// Triggers
-[filterLocation, filterStatus, search].forEach(el => el.addEventListener("input", ()=> renderRows(cache)));
-refreshBtn.addEventListener("click", loadAndRender);
+saveBtn.onclick = async ()=>{
+  if(editingId==null) return;
+  const patch = { status: statusSelect.value, notes: noteInput.value };
+  const { error } = await sb.from("applications").update(patch).eq("id", editingId);
+  if(error){ alert(error.message); return; }
+  closeModal(editModal);
+  await loadData();
+};
 
-// Init
-gateAndInit();
-loadStores();
+filterLocation.onchange = loadData;
+filterStatus.onchange = loadData;
+search.oninput = ()=> { render(); };
+refreshBtn.onclick = async ()=>{ await loadFilters(); await loadData(); };
 
+await gate();
+await loadFilters();
+await loadData();
 </script>
 </body>
 </html>
